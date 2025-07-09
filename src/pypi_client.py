@@ -107,7 +107,7 @@ class PyPIClient:
             # If no GitHub URL found, check homepage
             if not github_url:
                 homepage = info.get('home_page', '')
-                if 'github.com' in homepage.lower():
+                if homepage and 'github.com' in homepage.lower():
                     github_url = homepage
             
             # Get dependencies
@@ -449,7 +449,7 @@ class PyPIClient:
         
         if not github_url:
             homepage = info.get('home_page', '')
-            if 'github.com' in homepage.lower():
+            if homepage and 'github.com' in homepage.lower():
                 github_url = homepage
         
         # Get dependencies
