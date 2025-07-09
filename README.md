@@ -98,6 +98,13 @@ python main.py --input "../02-Source-Data/2025-07-09 IHACPA Review of ALL existi
 
 **Date Published Logic**: Column E (Date Published) shows the publication date for the **current/installed version** (Column C), not the latest version. This allows you to see when the version you're currently using was published, which is important for security and compliance analysis.
 
+**Color Highlighting**: Changed cells are automatically highlighted with different colors based on the type of change:
+- 🔴 **Red** - Security vulnerabilities found
+- 🟢 **Green** - Safe results (no vulnerabilities found)
+- 🔵 **Blue** - General updates and modifications
+- 🟠 **Orange** - Version information updates
+- 🟣 **Purple** - GitHub-related additions
+
 ### Detailed Usage Options
 
 #### Process all packages and create updated copy:
@@ -522,3 +529,4 @@ This tool is designed for internal IHACPA use and handles sensitive security inf
 - ✅ **Excel file generated properly** (119KB, proper Excel format)
 - ✅ **All packages preserved** in output with same format as input
 - ✅ **Copy-based logic working perfectly** as requested
+- ✅ **Color highlighting implemented** - Visual indication of different types of changes

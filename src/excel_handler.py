@@ -5,6 +5,7 @@ Handles reading and writing Excel files for the package review process
 """
 
 import openpyxl
+from openpyxl.styles import PatternFill, Font
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
@@ -49,6 +50,18 @@ class ExcelHandler:
         self.workbook = None
         self.worksheet = None
         self.logger = logging.getLogger(__name__)
+        
+        # Color definitions for highlighting changes
+        self.colors = {
+            'updated': PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid"),  # Light blue
+            'new_data': PatternFill(start_color="E6FFE6", end_color="E6FFE6", fill_type="solid"),  # Light green
+            'security_risk': PatternFill(start_color="FFE6E6", end_color="FFE6E6", fill_type="solid"),  # Light red
+            'version_update': PatternFill(start_color="FFF0E6", end_color="FFF0E6", fill_type="solid"),  # Light orange
+            'github_added': PatternFill(start_color="F0E6FF", end_color="F0E6FF", fill_type="solid"),  # Light purple
+        }
+        
+        # Track changes for color highlighting
+        self.changed_cells = []
         
     def load_workbook(self) -> bool:
         """Load Excel workbook and get active worksheet"""
@@ -106,7 +119,7 @@ class ExcelHandler:
         return packages
     
     def update_package_data(self, row_number: int, updates: Dict[str, Any]) -> bool:
-        """Update package data for a specific row"""
+        """Update package data for a specific row with color highlighting"""
         if not self.worksheet:
             return False
             
@@ -114,20 +127,83 @@ class ExcelHandler:
             for field, value in updates.items():
                 if field in self.COLUMN_MAPPING:
                     column = self.COLUMN_MAPPING[field]
+                    cell = self.worksheet.cell(row=row_number, column=column)
+                    
+                    # Store original value for change tracking
+                    original_value = cell.value
                     
                     # Fix datetime timezone issues for Excel
                     if hasattr(value, 'tzinfo') and value.tzinfo is not None:
                         # Convert timezone-aware datetime to naive datetime
                         value = value.replace(tzinfo=None)
                     
-                    self.worksheet.cell(row=row_number, column=column, value=value)
+                    # Only update if value has changed
+                    if original_value != value:
+                        cell.value = value
+                        
+                        # Apply color highlighting based on field type and content
+                        color_type = self._determine_color_type(field, value, original_value)
+                        if color_type:
+                            cell.fill = self.colors[color_type]
+                            
+                        # Track the change for reporting
+                        self.changed_cells.append({
+                            'row': row_number,
+                            'column': column,
+                            'field': field,
+                            'old_value': original_value,
+                            'new_value': value,
+                            'color_type': color_type
+                        })
+                        
+                        self.logger.debug(f"Updated {field} in row {row_number}: '{original_value}' → '{value}' (color: {color_type})")
                     
-            self.logger.debug(f"Updated row {row_number} with {len(updates)} fields")
             return True
             
         except Exception as e:
             self.logger.error(f"Error updating row {row_number}: {e}")
             return False
+    
+    def _determine_color_type(self, field: str, new_value: Any, old_value: Any) -> Optional[str]:
+        """Determine which color to apply based on the field and content of the change"""
+        if not new_value:
+            return None
+            
+        new_str = str(new_value).lower() if new_value else ""
+        
+        # Security-related fields - Red for vulnerabilities found, Green for safe
+        if field in ['nist_nvd_result', 'mitre_cve_result', 'snyk_result', 'exploit_db_result', 'github_advisory_result']:
+            if any(keyword in new_str for keyword in ['found', 'vulnerability', 'vulnerable', 'cve-', 'security']) and 'no' not in new_str:
+                return 'security_risk'
+            elif any(keyword in new_str for keyword in ['no vulnerabilities', 'none found', 'not found', 'not listed']):
+                return 'new_data'
+            else:
+                return 'updated'
+        
+        # Recommendation field - Red for security risks
+        elif field == 'recommendation':
+            if any(keyword in new_str for keyword in ['security risk', 'critical', 'high priority', 'vulnerability']):
+                return 'security_risk'
+            elif 'proceed' in new_str:
+                return 'new_data'
+            else:
+                return 'updated'
+        
+        # Version-related fields - Orange for version updates
+        elif field in ['latest_version', 'latest_release_date', 'date_published']:
+            return 'version_update'
+        
+        # GitHub-related fields - Purple
+        elif field in ['github_url', 'github_advisory_url', 'github_advisory_result']:
+            return 'github_added'
+        
+        # URLs and new data - Green
+        elif field in ['pypi_latest_link', 'nist_nvd_url', 'mitre_cve_url', 'snyk_url', 'exploit_db_url']:
+            return 'new_data'
+        
+        # General updates - Blue
+        else:
+            return 'updated'
     
     def save_workbook(self, backup: bool = True) -> bool:
         """Save the Excel workbook with optional backup"""
@@ -253,6 +329,68 @@ class ExcelHandler:
             errors.append("No package data found in Excel file")
         
         return len(errors) == 0, errors
+    
+    def get_color_statistics(self) -> Dict[str, Any]:
+        """Get statistics about color-coded changes"""
+        if not self.changed_cells:
+            return {
+                'total_changes': 0,
+                'color_breakdown': {},
+                'field_breakdown': {},
+                'affected_rows': 0
+            }
+        
+        color_counts = {}
+        field_counts = {}
+        affected_rows = set()
+        
+        for change in self.changed_cells:
+            color_type = change['color_type'] or 'updated'  # Default to 'updated' if None
+            field = change['field']
+            
+            color_counts[color_type] = color_counts.get(color_type, 0) + 1
+            field_counts[field] = field_counts.get(field, 0) + 1
+            affected_rows.add(change['row'])
+        
+        return {
+            'total_changes': len(self.changed_cells),
+            'color_breakdown': color_counts,
+            'field_breakdown': field_counts,
+            'affected_rows': len(affected_rows),
+            'color_descriptions': {
+                'security_risk': 'Security vulnerabilities found (Red)',
+                'new_data': 'New data added (Green)', 
+                'version_update': 'Version information updated (Orange)',
+                'github_added': 'GitHub information added (Purple)',
+                'updated': 'General updates (Blue)'
+            }
+        }
+    
+    def generate_color_summary_report(self) -> str:
+        """Generate a summary report of color-coded changes"""
+        if not self.changed_cells:
+            return "No changes detected - no color highlighting applied."
+        
+        stats = self.get_color_statistics()
+        
+        report = ["COLOR-CODED CHANGES SUMMARY"]
+        report.append("=" * 40)
+        report.append(f"Total changes: {stats['total_changes']}")
+        report.append(f"Affected rows: {stats['affected_rows']}")
+        report.append("")
+        
+        report.append("CHANGES BY COLOR TYPE:")
+        for color_type, count in stats['color_breakdown'].items():
+            description = stats['color_descriptions'].get(color_type, color_type)
+            color_name = color_type.upper() if color_type else "UNKNOWN"
+            report.append(f"  {color_name}: {count} changes - {description}")
+        
+        report.append("")
+        report.append("CHANGES BY FIELD:")
+        for field, count in sorted(stats['field_breakdown'].items()):
+            report.append(f"  {field}: {count} changes")
+        
+        return "\n".join(report)
     
     def compare_with_original(self, original_file_path: str) -> Dict[str, Any]:
         """Compare current Excel state with original file"""

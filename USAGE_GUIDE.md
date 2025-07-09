@@ -40,6 +40,39 @@ The system implements your requested workflow:
 - Current Version (C): `requests 2.29.0` → Date Published (E): `2023-04-26`
 - Latest Version (F): `requests 2.32.4` → Latest Release Date (H): `2025-06-09`
 
+## Color Highlighting System
+
+The system automatically applies color highlighting to changed cells to provide visual feedback about the type of change:
+
+### Color Scheme
+- 🔴 **Red (Light Red Background)** - Security vulnerabilities found
+  - NIST NVD, MITRE CVE, SNYK, Exploit DB results showing vulnerabilities
+  - Recommendations containing security warnings
+  
+- 🟢 **Green (Light Green Background)** - Safe results and new data
+  - "No vulnerabilities found" results
+  - New URLs and safe data additions
+  
+- 🔵 **Blue (Light Blue Background)** - General updates
+  - Requirements/dependencies updates
+  - General field modifications
+  
+- 🟠 **Orange (Light Orange Background)** - Version information
+  - Latest version updates
+  - Release date changes
+  - Current version publication dates
+  
+- 🟣 **Purple (Light Purple Background)** - GitHub-related additions
+  - GitHub URLs and repository information
+  - GitHub security advisory data
+
+### Color Report
+Each processing run generates a color summary showing:
+- Total changes by color type
+- Number of affected rows
+- Breakdown by field type
+- Security risk indicators
+
 ## Command Line Options
 
 ### Basic Usage

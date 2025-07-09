@@ -382,6 +382,9 @@ class IHACPAAutomation:
             # Generate detailed report
             changes_report = self.excel_handler.generate_changes_report(comparison_results)
             
+            # Generate color summary
+            color_summary = self.excel_handler.generate_color_summary_report()
+            
             # Add processing summary
             full_report = []
             full_report.append("IHACPA AUTOMATION CHANGES REPORT")
@@ -392,6 +395,8 @@ class IHACPAAutomation:
             full_report.append(f"Dry run mode: {self.dry_run}")
             full_report.append("")
             full_report.append(changes_report)
+            full_report.append("")
+            full_report.append(color_summary)
             
             # Add processing statistics
             if self.progress_logger:
