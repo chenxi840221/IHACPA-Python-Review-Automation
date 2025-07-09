@@ -190,7 +190,7 @@ class IHACPAAutomation:
         """Process a single package - check and update if needed"""
         package_name = package.get('package_name', '')
         row_number = package.get('row_number', 0)
-        current_version = package.get('current_version', '')
+        current_version = str(package.get('current_version', '')) if package.get('current_version') is not None else ''
         
         if not package_name:
             return False
@@ -202,8 +202,9 @@ class IHACPAAutomation:
             updates = {}
             
             # Check if this package needs updates (has empty automated fields)
+            # Note: Always update date_published to ensure it's based on current version
             automated_fields = [
-                'date_published', 'latest_version', 'pypi_latest_link', 'latest_release_date',
+                'latest_version', 'pypi_latest_link', 'latest_release_date',
                 'requires', 'development_status', 'github_url', 'github_advisory_url',
                 'github_advisory_result', 'nist_nvd_url', 'nist_nvd_result',
                 'mitre_cve_url', 'mitre_cve_result', 'snyk_url', 'snyk_result',
@@ -216,7 +217,10 @@ class IHACPAAutomation:
                     needs_update = True
                     break
             
-            if not needs_update:
+            # Always update date_published to ensure it's based on current version
+            force_update_date_published = True
+            
+            if not needs_update and not force_update_date_published:
                 # Package already has all data, skip processing
                 self.logger.debug(f"Package {package_name} already has complete data, skipping")
                 processing_time = (datetime.now() - start_time).total_seconds()
@@ -227,12 +231,12 @@ class IHACPAAutomation:
             pypi_info = self.pypi_client.get_package_info(package_name)
             if pypi_info:
                 # Get publication date for the CURRENT version (Column C), not latest version
+                # Always extract current version date to ensure it's based on installed version
                 current_version_date = None
-                if current_version and not package.get('date_published'):
+                if current_version:
                     current_version_date = self.pypi_client.extract_version_date_from_package_info(pypi_info, current_version)
                 
                 updates.update({
-                    'date_published': package.get('date_published') or current_version_date,
                     'latest_version': pypi_info.get('latest_version', ''),
                     'pypi_latest_link': pypi_info.get('pypi_latest_url', ''),
                     'latest_release_date': pypi_info.get('latest_release_date'),
@@ -240,6 +244,13 @@ class IHACPAAutomation:
                     'development_status': self._extract_dev_status(pypi_info.get('classifiers', [])),
                     'github_url': pypi_info.get('github_url', '')
                 })
+                
+                # Always include date_published - either valid date or "Not Available"
+                if current_version_date:
+                    updates['date_published'] = current_version_date
+                else:
+                    self.logger.warning(f"Could not retrieve publication date for {package_name} v{current_version}")
+                    updates['date_published'] = "Not Available"
                 
                 # Check for updates
                 if current_version != pypi_info.get('latest_version'):

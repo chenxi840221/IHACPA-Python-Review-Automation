@@ -2,6 +2,52 @@
 
 All notable changes to the IHACPA Python Package Review Automation project will be documented in this file.
 
+## [1.1.0] - 2025-07-09 - Date Published Logic Fix & "Not Available" Feature
+
+### 🚀 Major Enhancements
+- **Fixed Date Published Logic**: Column E now correctly shows publication date for current/installed version instead of latest version
+- **"Not Available" Feature**: When PyPI version links are not accessible, shows "Not Available" with red background
+- **Enhanced Version-Specific API**: Improved fallback mechanism for missing version data
+- **Color Highlighting Enhancement**: Added red highlighting for "Not Available" fields
+
+### 🔧 Technical Fixes
+- **Version String Conversion**: Fixed numeric version handling (float/int to string conversion)
+- **Always Try Version-Specific API**: Enhanced fallback mechanism that always attempts version-specific endpoints
+- **Improved Error Handling**: Better handling of missing versions in PyPI releases data
+- **Prevented Latest Version Fallback**: Date Published never uses Latest Version Release Date as fallback
+
+### 🎯 Specific Package Issues Resolved
+- **pytz v2022.7**: Now correctly shows `2022-12-18` (current version date) instead of `2025-03-25` (latest version date)
+- **PyYAML v6**: Now correctly shows "Not Available" (red background) since version doesn't exist
+- **PyQt5 v5.15.7**: Properly processes with correct date extraction
+- **PyQtWebEngine v5.15.4**: Properly processes with correct date extraction
+- **ruamel.yaml v0.17.21**: Properly processes with correct date extraction
+
+### 🎨 Visual Improvements
+- **Enhanced Color Scheme**: Added bright red background for "Not Available" fields
+- **Updated Documentation**: Comprehensive updates to README.md and USAGE_GUIDE.md explaining new logic
+
+### 📋 Logic Changes
+#### Before Fix:
+- Date Published often showed latest version dates (incorrect)
+- Failed to retrieve dates for some packages due to API limitations
+- No clear indication when version data was unavailable
+
+#### After Fix:
+- Date Published correctly shows current/installed version dates
+- "Not Available" displayed with red highlighting when PyPI version links fail
+- Enhanced API fallback mechanism catches more edge cases
+- Never uses Latest Version Release Date as fallback for Date Published
+
+### 🧪 Test Results
+- **pytz v2022.7**: ✅ Fixed - Shows correct current version date (2022-12-18)
+- **PyYAML v6**: ✅ Fixed - Shows "Not Available" (version doesn't exist)
+- **PyQt5 v5.15.7**: ✅ Working - Processes correctly
+- **PyQtWebEngine v5.15.4**: ✅ Working - Processes correctly
+- **ruamel.yaml v0.17.21**: ✅ Working - Processes correctly
+
+---
+
 ## [1.0.0] - 2025-07-09 - Production Release
 
 ### 🎉 Major Features Completed

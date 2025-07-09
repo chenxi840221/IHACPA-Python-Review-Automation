@@ -58,6 +58,7 @@ class ExcelHandler:
             'security_risk': PatternFill(start_color="FFE6E6", end_color="FFE6E6", fill_type="solid"),  # Light red
             'version_update': PatternFill(start_color="FFF0E6", end_color="FFF0E6", fill_type="solid"),  # Light orange
             'github_added': PatternFill(start_color="F0E6FF", end_color="F0E6FF", fill_type="solid"),  # Light purple
+            'not_available': PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid"),  # Red for Not Available
         }
         
         # Track changes for color highlighting
@@ -170,6 +171,10 @@ class ExcelHandler:
             return None
             
         new_str = str(new_value).lower() if new_value else ""
+        
+        # Special case: "Not Available" - Red color
+        if 'not available' in new_str:
+            return 'not_available'
         
         # Security-related fields - Red for vulnerabilities found, Green for safe
         if field in ['nist_nvd_result', 'mitre_cve_result', 'snyk_result', 'exploit_db_result', 'github_advisory_result']:

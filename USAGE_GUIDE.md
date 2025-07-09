@@ -36,18 +36,25 @@ The system implements your requested workflow:
 - Make informed decisions about version updates
 - Understand security timeline for compliance purposes
 
-**Example**:
+**Special Cases**:
+- If the PyPI version link is not available (404 error or missing data), the field shows **"Not Available"** with red highlighting
+- When current version equals latest version, both dates will be identical (correct behavior)
+- When current version differs from latest version, dates will be different
+
+**Examples**:
 - Current Version (C): `requests 2.29.0` → Date Published (E): `2023-04-26`
 - Latest Version (F): `requests 2.32.4` → Latest Release Date (H): `2025-06-09`
+- Non-existent Version: `PyYAML 6` → Date Published (E): `Not Available` (red background)
 
 ## Color Highlighting System
 
 The system automatically applies color highlighting to changed cells to provide visual feedback about the type of change:
 
 ### Color Scheme
-- 🔴 **Red (Light Red Background)** - Security vulnerabilities found
+- 🔴 **Red (Bright Red Background)** - Security vulnerabilities found or data not available
   - NIST NVD, MITRE CVE, SNYK, Exploit DB results showing vulnerabilities
   - Recommendations containing security warnings
+  - "Not Available" fields when PyPI version links are not accessible
   
 - 🟢 **Green (Light Green Background)** - Safe results and new data
   - "No vulnerabilities found" results

@@ -96,10 +96,10 @@ python main.py --input "../02-Source-Data/2025-07-09 IHACPA Review of ALL existi
 4. **Preserves all data** - output has same format as input with all packages included
 5. **Only updates packages needing updates** (those with empty automated fields)
 
-**Date Published Logic**: Column E (Date Published) shows the publication date for the **current/installed version** (Column C), not the latest version. This allows you to see when the version you're currently using was published, which is important for security and compliance analysis.
+**Date Published Logic**: Column E (Date Published) shows the publication date for the **current/installed version** (Column C), not the latest version. This allows you to see when the version you're currently using was published, which is important for security and compliance analysis. If the PyPI version link is not available, the field shows "Not Available" with red highlighting.
 
 **Color Highlighting**: Changed cells are automatically highlighted with different colors based on the type of change:
-- 🔴 **Red** - Security vulnerabilities found
+- 🔴 **Red** - Security vulnerabilities found or "Not Available" data
 - 🟢 **Green** - Safe results (no vulnerabilities found)
 - 🔵 **Blue** - General updates and modifications
 - 🟠 **Orange** - Version information updates

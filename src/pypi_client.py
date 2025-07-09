@@ -159,9 +159,26 @@ class PyPIClient:
             return None
     
     def get_version_publication_date(self, package_name: str, version: str) -> Optional[datetime]:
-        """Get the publication date for a specific version of a package"""
-        url = f"{self.BASE_URL}{package_name}{self.JSON_SUFFIX}"
-        data = self._make_request(url)
+        """Get the publication date for a specific version of a package using version-specific API"""
+        # Try version-specific endpoint first
+        version_url = f"{self.BASE_URL}{package_name}/{version}{self.JSON_SUFFIX}"
+        data = self._make_request(version_url)
+        
+        if data:
+            try:
+                info = data.get('info', {})
+                upload_time = info.get('upload_time_iso_8601', '')
+                if upload_time:
+                    try:
+                        return datetime.fromisoformat(upload_time.replace('Z', '+00:00'))
+                    except ValueError:
+                        self.logger.warning(f"Could not parse date for {package_name} v{version}: {upload_time}")
+            except Exception as e:
+                self.logger.debug(f"Error parsing version-specific data for {package_name} v{version}: {e}")
+        
+        # Fallback to general endpoint and search releases
+        general_url = f"{self.BASE_URL}{package_name}{self.JSON_SUFFIX}"
+        data = self._make_request(general_url)
         
         if not data:
             return None
@@ -192,17 +209,41 @@ class PyPIClient:
             
         try:
             releases = package_info['releases']
+            package_name = package_info.get('name', 'unknown')
             
+            self.logger.debug(f"Searching for version {version} in {len(releases)} releases for {package_name}")
+            
+            # First try to find the version in the releases section
             if version and version in releases:
                 release_files = releases[version]
+                self.logger.debug(f"Found version {version} with {len(release_files)} release files")
                 if release_files:
                     upload_time = release_files[0].get('upload_time_iso_8601', '')
                     if upload_time:
                         try:
-                            return datetime.fromisoformat(upload_time.replace('Z', '+00:00'))
+                            result = datetime.fromisoformat(upload_time.replace('Z', '+00:00'))
+                            self.logger.debug(f"Successfully parsed date for {package_name} v{version}: {result}")
+                            return result
                         except ValueError:
-                            package_name = package_info.get('name', 'unknown')
                             self.logger.warning(f"Could not parse date for {package_name} v{version}: {upload_time}")
+                    else:
+                        self.logger.debug(f"No upload_time_iso_8601 found for {package_name} v{version}")
+                else:
+                    self.logger.debug(f"No release files found for {package_name} v{version}")
+            else:
+                self.logger.debug(f"Version {version} not found in releases for {package_name}")
+            
+            # Always try version-specific API as fallback (some versions exist but aren't in releases list)
+            if version:
+                self.logger.info(f"Trying version-specific API for {package_name} v{version}")
+                if version not in releases:
+                    self.logger.debug(f"Available versions: {list(releases.keys())[:10]}")
+                fallback_date = self.get_version_publication_date(package_name, version)
+                if fallback_date:
+                    self.logger.info(f"Successfully retrieved date for {package_name} v{version} via version-specific API")
+                    return fallback_date
+                else:
+                    self.logger.warning(f"Could not retrieve date for {package_name} v{version} via version-specific API")
             
             return None
             
