@@ -1,0 +1,35 @@
+# Core dependencies for IHACPA Python Package Review Automation
+# Tested and working versions as of 2025-07-09
+
+# Essential Excel and data processing
+openpyxl==3.1.5
+requests==2.32.4
+
+# Data analysis (optional - can work without pandas if needed)
+# Note: pandas has dependency issues in some environments
+# The application can work with openpyxl alone if needed
+pandas>=2.0.0,<3.0.0
+
+# Async HTTP requests for concurrent API calls
+aiohttp>=3.8.0
+asyncio-throttle>=1.0.0
+
+# Configuration and environment
+pyyaml>=6.0.0
+python-dotenv>=0.19.0
+
+# Development and testing dependencies
+pytest==8.4.1
+pytest-asyncio>=0.18.0
+black>=21.0.0
+flake8>=4.0.0
+mypy>=0.900
+
+# Documentation
+mkdocs>=1.2.0
+mkdocs-material>=8.0.0
+
+# Additional utilities found useful during testing
+python-dateutil>=2.8.0
+certifi>=2025.0.0
+charset-normalizer>=3.0.0
