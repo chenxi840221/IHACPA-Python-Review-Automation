@@ -27,6 +27,19 @@ The system implements your requested workflow:
 4. **Preserves all original data** - output has same format as input
 5. **Generates comparison report** showing exactly what changed
 
+## Date Published Logic
+
+**Important**: Column E (Date Published) shows the publication date for the **current/installed version** (Column C), not the latest available version. This design allows you to:
+
+- See when the version you're currently using was published
+- Assess the age of your current installation
+- Make informed decisions about version updates
+- Understand security timeline for compliance purposes
+
+**Example**:
+- Current Version (C): `requests 2.29.0` → Date Published (E): `2023-04-26`
+- Latest Version (F): `requests 2.32.4` → Latest Release Date (H): `2025-06-09`
+
 ## Command Line Options
 
 ### Basic Usage

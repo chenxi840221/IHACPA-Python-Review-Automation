@@ -226,8 +226,13 @@ class IHACPAAutomation:
             # Get PyPI information
             pypi_info = self.pypi_client.get_package_info(package_name)
             if pypi_info:
+                # Get publication date for the CURRENT version (Column C), not latest version
+                current_version_date = None
+                if current_version and not package.get('date_published'):
+                    current_version_date = self.pypi_client.extract_version_date_from_package_info(pypi_info, current_version)
+                
                 updates.update({
-                    'date_published': package.get('date_published') or pypi_info.get('latest_release_date'),
+                    'date_published': package.get('date_published') or current_version_date,
                     'latest_version': pypi_info.get('latest_version', ''),
                     'pypi_latest_link': pypi_info.get('pypi_latest_url', ''),
                     'latest_release_date': pypi_info.get('latest_release_date'),

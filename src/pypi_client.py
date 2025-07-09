@@ -148,13 +148,67 @@ class PyPIClient:
                 'release_url': info.get('release_url', ''),
                 'docs_url': info.get('docs_url', ''),
                 'bugtrack_url': info.get('bugtrack_url', ''),
-                'classifiers': info.get('classifiers', [])
+                'classifiers': info.get('classifiers', []),
+                'releases': releases  # Include releases data for version-specific queries
             }
             
             return package_info
             
         except Exception as e:
             self.logger.error(f"Error parsing package info for {package_name}: {e}")
+            return None
+    
+    def get_version_publication_date(self, package_name: str, version: str) -> Optional[datetime]:
+        """Get the publication date for a specific version of a package"""
+        url = f"{self.BASE_URL}{package_name}{self.JSON_SUFFIX}"
+        data = self._make_request(url)
+        
+        if not data:
+            return None
+            
+        try:
+            releases = data.get('releases', {})
+            
+            if version and version in releases:
+                release_files = releases[version]
+                if release_files:
+                    upload_time = release_files[0].get('upload_time_iso_8601', '')
+                    if upload_time:
+                        try:
+                            return datetime.fromisoformat(upload_time.replace('Z', '+00:00'))
+                        except ValueError:
+                            self.logger.warning(f"Could not parse date for {package_name} v{version}: {upload_time}")
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error getting publication date for {package_name} v{version}: {e}")
+            return None
+    
+    def extract_version_date_from_package_info(self, package_info: Dict[str, Any], version: str) -> Optional[datetime]:
+        """Extract publication date for specific version from already fetched package info"""
+        if not package_info or 'releases' not in package_info:
+            return None
+            
+        try:
+            releases = package_info['releases']
+            
+            if version and version in releases:
+                release_files = releases[version]
+                if release_files:
+                    upload_time = release_files[0].get('upload_time_iso_8601', '')
+                    if upload_time:
+                        try:
+                            return datetime.fromisoformat(upload_time.replace('Z', '+00:00'))
+                        except ValueError:
+                            package_name = package_info.get('name', 'unknown')
+                            self.logger.warning(f"Could not parse date for {package_name} v{version}: {upload_time}")
+            
+            return None
+            
+        except Exception as e:
+            package_name = package_info.get('name', 'unknown')
+            self.logger.error(f"Error extracting publication date for {package_name} v{version}: {e}")
             return None
     
     def get_package_versions(self, package_name: str) -> List[str]:
