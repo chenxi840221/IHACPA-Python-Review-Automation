@@ -187,6 +187,42 @@ class AICVEAnalyzer:
             self.logger.error(f"Error in AI SNYK analysis for {package_name}: {e}")
             return f"AI SNYK analysis error - manual review required: {str(e)}"
     
+    async def analyze_exploit_db_result(self, package_name: str, current_version: str, 
+                                      exploit_db_lookup_url: str, raw_exploit_data: str = None) -> str:
+        """
+        Analyze Exploit Database results using AI and assess impact on current version
+        
+        Args:
+            package_name: Name of the Python package
+            current_version: Currently installed version
+            exploit_db_lookup_url: Exploit Database lookup URL that was searched
+            raw_exploit_data: Raw data from Exploit Database lookup (optional)
+        
+        Returns:
+            AI-analyzed result with version-specific impact assessment
+        """
+        if not self.enabled:
+            return "AI analysis not available - manual review required"
+            
+        try:
+            # Create Exploit Database-specific analysis prompt
+            prompt = self._create_exploit_db_analysis_prompt(
+                package_name, current_version, exploit_db_lookup_url, raw_exploit_data
+            )
+            
+            # Call OpenAI API
+            response = await self._call_openai_api(prompt)
+            
+            if response:
+                self.logger.debug(f"AI Exploit Database analysis completed for {package_name} v{current_version}")
+                return response
+            else:
+                return f"AI Exploit Database analysis failed - manual review required for {package_name} v{current_version}"
+                
+        except Exception as e:
+            self.logger.error(f"Error in AI Exploit Database analysis for {package_name}: {e}")
+            return f"AI Exploit Database analysis error - manual review required: {str(e)}"
+    
     def _create_analysis_prompt(self, package_name: str, current_version: str, 
                               cve_lookup_url: str, raw_cve_data: str = None) -> str:
         """Create AI analysis prompt for CVE assessment"""
@@ -263,6 +299,47 @@ GUIDELINES:
         # Add raw SNYK data if available
         if raw_snyk_data:
             base_prompt += f"\n\nRAW SNYK DATA:\n{raw_snyk_data[:2000]}..."  # Limit to avoid token limits
+            
+        return base_prompt
+    
+    def _create_exploit_db_analysis_prompt(self, package_name: str, current_version: str, 
+                                         exploit_db_lookup_url: str, raw_exploit_data: str = None) -> str:
+        """Create AI analysis prompt for Exploit Database assessment"""
+        
+        base_prompt = f"""
+You are a cybersecurity expert analyzing Exploit Database (exploit-db.com) data for Python packages. 
+
+PACKAGE INFORMATION:
+- Package Name: {package_name}
+- Current Version: {current_version}
+- Exploit Database Lookup URL: {exploit_db_lookup_url}
+
+TASK:
+Analyze the Exploit Database information for this specific package and version. Exploit Database is a comprehensive archive of public exploits and corresponding vulnerable software. Provide a concise assessment that includes:
+
+1. EXPLOIT STATUS: Are there any public exploits in Exploit Database that affect the current version {current_version}?
+2. SEVERITY ASSESSMENT: If exploits exist, what is the highest risk level based on exploit availability?
+3. VERSION IMPACT: Does the current version {current_version} have known public exploits?
+4. RISK ASSESSMENT: What is the overall security risk level considering exploit availability?
+5. RECOMMENDATION: Should this version be updated urgently given exploit availability?
+
+RESPONSE FORMAT:
+Provide a concise response (2-3 sentences max) in this format:
+"Exploit Database Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Recommendation: [URGENT_UPDATE/ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+
+GUIDELINES:
+- Focus on PUBLIC EXPLOITS which represent immediate actionable threats
+- Be specific about version impact based on Exploit Database records
+- Consider that exploit availability significantly increases risk severity
+- Use clear, urgent language if public exploits are found
+- If no specific version information is available, state "version impact unclear"
+- Prioritize immediate security action when exploits are publicly available
+- Remember that Exploit Database focuses on proven, working exploits
+"""
+        
+        # Add raw Exploit Database data if available
+        if raw_exploit_data:
+            base_prompt += f"\n\nRAW EXPLOIT DATABASE DATA:\n{raw_exploit_data[:2000]}..."  # Limit to avoid token limits
             
         return base_prompt
     
