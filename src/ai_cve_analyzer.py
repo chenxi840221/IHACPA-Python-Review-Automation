@@ -223,6 +223,42 @@ class AICVEAnalyzer:
             self.logger.error(f"Error in AI Exploit Database analysis for {package_name}: {e}")
             return f"AI Exploit Database analysis error - manual review required: {str(e)}"
     
+    async def analyze_nist_nvd_result(self, package_name: str, current_version: str, 
+                                     nist_nvd_url: str, raw_nist_data: str = None) -> str:
+        """
+        Analyze NIST NVD vulnerability results using AI and assess impact on current version
+        
+        Args:
+            package_name: Name of the Python package
+            current_version: Currently installed version
+            nist_nvd_url: NIST NVD lookup URL that was searched
+            raw_nist_data: Raw data from NIST NVD lookup (optional)
+        
+        Returns:
+            AI-analyzed result with version-specific impact assessment
+        """
+        if not self.enabled:
+            return "AI analysis not available - manual review required"
+            
+        try:
+            # Create NIST NVD-specific analysis prompt
+            prompt = self._create_nist_nvd_analysis_prompt(
+                package_name, current_version, nist_nvd_url, raw_nist_data
+            )
+            
+            # Call OpenAI API
+            response = await self._call_openai_api(prompt)
+            
+            if response:
+                self.logger.debug(f"AI NIST NVD analysis completed for {package_name} v{current_version}")
+                return response
+            else:
+                return f"AI NIST NVD analysis failed - manual review required for {package_name} v{current_version}"
+                
+        except Exception as e:
+            self.logger.error(f"Error in AI NIST NVD analysis for {package_name}: {e}")
+            return f"AI NIST NVD analysis error - manual review required: {str(e)}"
+
     async def analyze_github_advisory_result(self, package_name: str, current_version: str, 
                                            github_advisory_url: str, raw_github_data: str = None) -> str:
         """
@@ -417,6 +453,47 @@ GUIDELINES:
         # Add raw GitHub Advisory data if available
         if raw_github_data:
             base_prompt += f"\n\nRAW GITHUB ADVISORY DATA:\n{raw_github_data[:2000]}..."  # Limit to avoid token limits
+            
+        return base_prompt
+    
+    def _create_nist_nvd_analysis_prompt(self, package_name: str, current_version: str, 
+                                        nist_nvd_url: str, raw_nist_data: str = None) -> str:
+        """Create AI analysis prompt for NIST NVD vulnerability assessment"""
+        
+        base_prompt = f"""
+You are a cybersecurity expert analyzing NIST NVD (National Vulnerability Database) data for Python packages. 
+
+PACKAGE INFORMATION:
+- Package Name: {package_name}
+- Current Version: {current_version}
+- NIST NVD URL: {nist_nvd_url}
+
+TASK:
+Analyze the NIST NVD vulnerability information for this specific package and version. NIST NVD is the authoritative U.S. government repository of standards-based vulnerability management data. Provide a concise assessment that includes:
+
+1. VULNERABILITY STATUS: Are there any CVEs in NIST NVD that affect the current version {current_version}?
+2. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest CVSS severity level?
+3. VERSION IMPACT: Does the current version {current_version} have known vulnerabilities in NIST NVD?
+4. RISK ASSESSMENT: What is the overall security risk level based on NIST NVD data?
+5. RECOMMENDATION: Should this version be updated based on NIST NVD findings?
+
+RESPONSE FORMAT:
+Provide a concise response (2-3 sentences max) in this format:
+"NIST NVD Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+
+GUIDELINES:
+- Focus on CVEs with CVSS scores which represent official vulnerability assessments
+- Be specific about version impact based on NIST NVD vulnerability records
+- Consider NIST NVD's role as the official U.S. government vulnerability database
+- Use clear, actionable language for security recommendations
+- If no specific version information is available, state "version impact unclear"
+- Prioritize security based on official CVSS scoring and severity levels
+- Remember that NIST NVD provides the most authoritative vulnerability data
+"""
+        
+        # Add raw NIST NVD data if available
+        if raw_nist_data:
+            base_prompt += f"\n\nRAW NIST NVD DATA:\n{raw_nist_data[:2000]}..."  # Limit to avoid token limits
             
         return base_prompt
     

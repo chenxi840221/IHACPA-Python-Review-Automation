@@ -17,7 +17,7 @@ from datetime import datetime
 class AppConfig:
     """Application configuration"""
     name: str = "IHACPA Python Package Review Automation"
-    version: str = "1.0.0"
+    version: str = "1.5.0"
     log_level: str = "INFO"
     debug_mode: bool = False
 

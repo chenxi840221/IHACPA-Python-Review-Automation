@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide covers common issues and their solutions for the IHACPA Python Package Review Automation system.
+This guide covers common issues and their solutions for the IHACPA Python Package Review Automation system v1.5.0.
 
 ## Common Issues and Solutions
 
