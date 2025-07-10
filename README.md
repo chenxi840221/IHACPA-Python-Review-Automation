@@ -145,6 +145,11 @@ python main.py --input "../02-Source-Data/2025-07-09 IHACPA Review of ALL existi
 
 # If dry run looks good, run for real - creates complete updated file
 python main.py --input "../02-Source-Data/2025-07-09 IHACPA Review of ALL existing PYTHON Packages.xlsx" --output "updated_packages.xlsx"
+
+# NEW: Format check commands (v1.4.0+) ✨
+python main.py --input "your_file.xlsx" --format-check-only  # Check formatting issues without fixing
+python main.py --input "your_file.xlsx" --format-check       # Check and fix formatting issues
+python main.py --input "your_file.xlsx" --output "updated.xlsx" --format-check  # Process + format check
 ```
 
 **Copy-Based Processing Logic**: The system follows your requested workflow:
@@ -585,18 +590,30 @@ ihacpa-automation/
 
 This tool is designed for internal IHACPA use and handles sensitive security information. Ensure proper access controls and data handling procedures are followed.
 
+## 📚 Comprehensive Documentation
+
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Complete troubleshooting guide for common issues
+- **[CONFIGURATION_REFERENCE.md](CONFIGURATION_REFERENCE.md)** - Full configuration options and setup guide
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API documentation for developers
+- **[FORMAT_CHECK_USAGE.md](FORMAT_CHECK_USAGE.md)** - Format check functionality guide
+- **[DESIGN_DOCUMENT.md](DESIGN_DOCUMENT.md)** - System architecture and design
+- **[IMPLEMENTATION_FLOW.md](IMPLEMENTATION_FLOW.md)** - Step-by-step process flow
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and updates
+
 ---
 
 **Last Updated:** July 10, 2025  
-**Version:** 1.4.0 - Quad AI Integration ✨  
-**Status:** ✅ **PRODUCTION READY** - Complete AI automation across all vulnerability databases
+**Version:** 1.4.0 - Quad AI Integration + Format Check ✨  
+**Status:** ✅ **PRODUCTION READY** - Complete AI automation + Format management system
 
 ## Recent Test Results (July 10, 2025) ✨
 - ✅ **Quad AI Integration Completed** - All four vulnerability databases now use AI
+- ✅ **Format Check System** - 2,430 formatting issues detected and fixed across 486 packages
 - ✅ **MITRE CVE AI**: Automated analysis with version-specific impact assessment
 - ✅ **SNYK AI**: Automated commercial vulnerability intelligence analysis  
 - ✅ **Exploit Database AI**: Automated public exploit availability analysis
 - ✅ **GitHub Security Advisory AI**: Automated community vulnerability intelligence analysis
+- ✅ **Excel Formatting**: Professional appearance with correct security risk highlighting
 - ✅ **Azure OpenAI GPT-4**: Production-ready configuration with endpoint automation-seanchen.openai.azure.com
 - ✅ **Font Color Enhancement**: Professional color-coded results matching fill colors
 - ✅ **All 486 packages supported** with full AI analysis capability
