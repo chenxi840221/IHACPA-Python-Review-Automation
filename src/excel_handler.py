@@ -61,6 +61,17 @@ class ExcelHandler:
             'not_available': PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid"),  # Red for Not Available
         }
         
+        # Font color definitions that complement the fill colors
+        self.font_colors = {
+            'updated': Font(color="003D66", bold=False),          # Dark blue for light blue background
+            'new_data': Font(color="004D00", bold=False),         # Dark green for light green background
+            'security_risk': Font(color="660000", bold=True),     # Dark red (bold) for light red background
+            'version_update': Font(color="663300", bold=False),   # Dark orange/brown for light orange background
+            'github_added': Font(color="330066", bold=False),     # Dark purple for light purple background
+            'not_available': Font(color="FFFFFF", bold=True),     # White (bold) for red background
+            'default': Font(color="000000", bold=False),          # Black for white/no background
+        }
+        
         # Track changes for color highlighting
         self.changed_cells = []
         
@@ -146,6 +157,11 @@ class ExcelHandler:
                         color_type = self._determine_color_type(field, value, original_value)
                         if color_type:
                             cell.fill = self.colors[color_type]
+                            # Apply corresponding font color
+                            cell.font = self.font_colors.get(color_type, self.font_colors['default'])
+                        else:
+                            # Apply default font color for cells without special fill
+                            cell.font = self.font_colors['default']
                             
                         # Track the change for reporting
                         self.changed_cells.append({
@@ -363,11 +379,12 @@ class ExcelHandler:
             'field_breakdown': field_counts,
             'affected_rows': len(affected_rows),
             'color_descriptions': {
-                'security_risk': 'Security vulnerabilities found (Red)',
-                'new_data': 'New data added (Green)', 
-                'version_update': 'Version information updated (Orange)',
-                'github_added': 'GitHub information added (Purple)',
-                'updated': 'General updates (Blue)'
+                'security_risk': 'Security vulnerabilities found (Light red background, dark red text)',
+                'new_data': 'New data added (Light green background, dark green text)', 
+                'version_update': 'Version information updated (Light orange background, dark orange text)',
+                'github_added': 'GitHub information added (Light purple background, dark purple text)',
+                'updated': 'General updates (Light blue background, dark blue text)',
+                'not_available': 'Not Available data (Red background, white text)'
             }
         }
     
