@@ -63,11 +63,11 @@ class ExcelHandler:
         
         # Font color definitions that complement the fill colors
         self.font_colors = {
-            'updated': Font(color="003D66", bold=False),          # Dark blue for light blue background
-            'new_data': Font(color="004D00", bold=False),         # Dark green for light green background
-            'security_risk': Font(color="660000", bold=True),     # Dark red (bold) for light red background
-            'version_update': Font(color="663300", bold=False),   # Dark orange/brown for light orange background
-            'github_added': Font(color="330066", bold=False),     # Dark purple for light purple background
+            'updated': Font(color="0066CC", bold=True),           # Bright blue (bold) for light blue background
+            'new_data': Font(color="008000", bold=True),          # Dark green (bold) for light green background
+            'security_risk': Font(color="CC0000", bold=True),     # Bright red (bold) for light red background
+            'version_update': Font(color="FF6600", bold=True),    # Bright orange (bold) for light orange background
+            'github_added': Font(color="6600CC", bold=True),      # Bright purple (bold) for light purple background
             'not_available': Font(color="FFFFFF", bold=True),     # White (bold) for red background
             'default': Font(color="000000", bold=False),          # Black for white/no background
         }
@@ -194,9 +194,13 @@ class ExcelHandler:
         
         # Security-related fields - Red for vulnerabilities found, Green for safe
         if field in ['nist_nvd_result', 'mitre_cve_result', 'snyk_result', 'exploit_db_result', 'github_advisory_result']:
-            if any(keyword in new_str for keyword in ['found', 'vulnerability', 'vulnerable', 'cve-', 'security']) and 'no' not in new_str:
+            # Check for vulnerabilities found - more specific patterns
+            if any(keyword in new_str for keyword in [
+                'security risk', 'vulnerability', 'vulnerable', 'cve-', 'found', 'affected', 'exploitable',
+                'severity: high', 'severity: critical', 'severity: medium', 'action_needed'
+            ]) and not any(safe_keyword in new_str for safe_keyword in ['none found', 'not found', 'no published', 'not_found']):
                 return 'security_risk'
-            elif any(keyword in new_str for keyword in ['no vulnerabilities', 'none found', 'not found', 'not listed']):
+            elif any(safe_keyword in new_str for safe_keyword in ['none found', 'not found', 'no published', 'not_found', 'no vulnerabilities']):
                 return 'new_data'
             else:
                 return 'updated'
@@ -214,8 +218,8 @@ class ExcelHandler:
         elif field in ['latest_version', 'latest_release_date', 'date_published']:
             return 'version_update'
         
-        # GitHub-related fields - Purple
-        elif field in ['github_url', 'github_advisory_url', 'github_advisory_result']:
+        # GitHub-related fields - Purple (but not github_advisory_result - that's handled above as security)
+        elif field in ['github_url', 'github_advisory_url']:
             return 'github_added'
         
         # URLs and new data - Green
