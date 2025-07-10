@@ -45,6 +45,6 @@ azure_openai:
   enabled: true
   deployment_name: "gpt-4.1"
   api_version: "2025-01-01-preview"
-  endpoint: "https://automation-seanchen.openai.azure.com/"
+  endpoint: "https://your-resource-name.openai.azure.com/"
   max_retries: 2
   retry_delay: 5.0

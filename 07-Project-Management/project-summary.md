@@ -113,9 +113,9 @@ IHACPA-Python-Review-Automation-Complete/
 ## 📞 Stakeholder Communication
 
 ### **Key Stakeholders:**
-- **Doug McFarlane** - Project Lead
-- **Linda Aney** - Technical Lead
-- **Sean Chen** - Development Resource
+- **Project Lead** - Primary stakeholder and requirements owner
+- **Technical Lead** - Technical oversight and coordination
+- **Development Resource** - Implementation and technical support
 
 ### **Communication Plan:**
 - **Daily:** Progress updates via tracking system

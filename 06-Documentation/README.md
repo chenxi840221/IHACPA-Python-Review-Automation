@@ -7,7 +7,7 @@ This project automates the cybersecurity vulnerability review process for Python
 ## Current Status
 
 - **Total Packages to Review:** ~490
-- **Manual Progress:** Item 284 (Doug's current position)
+- **Manual Progress:** Item 284 (Project Lead's current position)
 - **Remaining:** ~200 packages
 - **Status:** Requirements complete, ready for implementation
 
@@ -131,9 +131,9 @@ ihacpa-automation/
 
 ## Team Contacts
 
-- **Doug McFarlane** - Primary reviewer (currently at item 284)
-- **Linda Aney** - Project coordinator
-- **Sean Chen** - Technical assistance
+- **Primary Reviewer** - Package review lead (currently at item 284)
+- **Project Coordinator** - Project management
+- **Technical Support** - Technical assistance
 
 ## Implementation Status
 

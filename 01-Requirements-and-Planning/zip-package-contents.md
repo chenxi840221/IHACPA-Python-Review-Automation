@@ -128,9 +128,9 @@ IHACPA-Python-Review-Automation-Complete/
 
 ## Support Information
 
-- **Primary Contact:** Doug McFarlane (currently at item 284 of manual review)
-- **Project Coordinator:** Linda Aney
-- **Technical Support:** Sean Chen
+- **Primary Contact:** Project Lead (currently at item 284 of manual review)
+- **Project Coordinator:** Technical Lead
+- **Technical Support:** Development Resource
 
 ---
 

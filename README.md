@@ -548,9 +548,9 @@ ihacpa-automation/
 
 ## Team Contacts
 
-- **Doug McFarlane** - Primary reviewer (currently at item 284)
-- **Linda Aney** - Project coordinator
-- **Sean Chen** - Technical assistance
+- **Primary Reviewer** - Package review lead (currently at item 284)
+- **Project Coordinator** - Project management
+- **Technical Support** - Technical assistance
 
 ## Implementation Status
 
@@ -619,7 +619,7 @@ This tool is designed for internal IHACPA use and handles sensitive security inf
 - ✅ **Exploit Database AI**: Automated public exploit availability analysis
 - ✅ **GitHub Security Advisory AI**: Automated community vulnerability intelligence analysis
 - ✅ **Excel Formatting**: Professional appearance with correct security risk highlighting
-- ✅ **Azure OpenAI GPT-4**: Production-ready configuration with endpoint automation-seanchen.openai.azure.com
+- ✅ **Azure OpenAI GPT-4**: Production-ready configuration with Azure OpenAI Service
 - ✅ **Font Color Enhancement**: Professional color-coded results matching fill colors
 - ✅ **All 486 packages supported** with full AI analysis capability
 - ✅ **Consistent AI format** across all five databases for easy comparison

@@ -185,9 +185,9 @@ APIS = {
 - Flag uncertain results for manual review
 
 ## Contact Information
-- **Primary Contact:** Doug McFarlane (currently at item 284 of manual review)
-- **Secondary Contact:** Linda Aney (project coordinator)
-- **Technical Contact:** Sean Chen (available to assist with automation)
+- **Primary Contact:** Project Lead (currently at item 284 of manual review)
+- **Secondary Contact:** Project Coordinator
+- **Technical Contact:** Development Resource (available to assist with automation)
 
 ## Files to Transfer to Claude Code
 
