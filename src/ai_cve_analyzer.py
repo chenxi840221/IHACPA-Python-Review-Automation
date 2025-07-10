@@ -223,6 +223,42 @@ class AICVEAnalyzer:
             self.logger.error(f"Error in AI Exploit Database analysis for {package_name}: {e}")
             return f"AI Exploit Database analysis error - manual review required: {str(e)}"
     
+    async def analyze_github_advisory_result(self, package_name: str, current_version: str, 
+                                           github_advisory_url: str, raw_github_data: str = None) -> str:
+        """
+        Analyze GitHub Security Advisory results using AI and assess impact on current version
+        
+        Args:
+            package_name: Name of the Python package
+            current_version: Currently installed version
+            github_advisory_url: GitHub Security Advisory lookup URL that was searched
+            raw_github_data: Raw data from GitHub Security Advisory lookup (optional)
+        
+        Returns:
+            AI-analyzed result with version-specific impact assessment
+        """
+        if not self.enabled:
+            return "AI analysis not available - manual review required"
+            
+        try:
+            # Create GitHub Security Advisory-specific analysis prompt
+            prompt = self._create_github_advisory_analysis_prompt(
+                package_name, current_version, github_advisory_url, raw_github_data
+            )
+            
+            # Call OpenAI API
+            response = await self._call_openai_api(prompt)
+            
+            if response:
+                self.logger.debug(f"AI GitHub Security Advisory analysis completed for {package_name} v{current_version}")
+                return response
+            else:
+                return f"AI GitHub Security Advisory analysis failed - manual review required for {package_name} v{current_version}"
+                
+        except Exception as e:
+            self.logger.error(f"Error in AI GitHub Security Advisory analysis for {package_name}: {e}")
+            return f"AI GitHub Security Advisory analysis error - manual review required: {str(e)}"
+    
     def _create_analysis_prompt(self, package_name: str, current_version: str, 
                               cve_lookup_url: str, raw_cve_data: str = None) -> str:
         """Create AI analysis prompt for CVE assessment"""
@@ -340,6 +376,47 @@ GUIDELINES:
         # Add raw Exploit Database data if available
         if raw_exploit_data:
             base_prompt += f"\n\nRAW EXPLOIT DATABASE DATA:\n{raw_exploit_data[:2000]}..."  # Limit to avoid token limits
+            
+        return base_prompt
+    
+    def _create_github_advisory_analysis_prompt(self, package_name: str, current_version: str, 
+                                               github_advisory_url: str, raw_github_data: str = None) -> str:
+        """Create AI analysis prompt for GitHub Security Advisory assessment"""
+        
+        base_prompt = f"""
+You are a cybersecurity expert analyzing GitHub Security Advisory data for Python packages. 
+
+PACKAGE INFORMATION:
+- Package Name: {package_name}
+- Current Version: {current_version}
+- GitHub Advisory URL: {github_advisory_url}
+
+TASK:
+Analyze the GitHub Security Advisory information for this specific package and version. GitHub Security Advisories are a comprehensive database of vulnerabilities reported by the GitHub community and maintainers. Provide a concise assessment that includes:
+
+1. ADVISORY STATUS: Are there any security advisories in GitHub that affect the current version {current_version}?
+2. SEVERITY ASSESSMENT: If advisories exist, what is the highest severity level reported?
+3. VERSION IMPACT: Does the current version {current_version} have known security advisories?
+4. RISK ASSESSMENT: What is the overall security risk level based on GitHub Advisory data?
+5. RECOMMENDATION: Should this version be updated based on GitHub Security Advisory findings?
+
+RESPONSE FORMAT:
+Provide a concise response (2-3 sentences max) in this format:
+"GitHub Security Advisory Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+
+GUIDELINES:
+- Focus on SECURITY ADVISORIES which represent reported vulnerabilities
+- Be specific about version impact based on GitHub Advisory records
+- Consider that GitHub Advisories often include detailed remediation guidance
+- Use clear, actionable language for security recommendations
+- If no specific version information is available, state "version impact unclear"
+- Prioritize security best practices and community-reported vulnerabilities
+- Remember that GitHub Advisories are often the first place vulnerabilities are disclosed
+"""
+        
+        # Add raw GitHub Advisory data if available
+        if raw_github_data:
+            base_prompt += f"\n\nRAW GITHUB ADVISORY DATA:\n{raw_github_data[:2000]}..."  # Limit to avoid token limits
             
         return base_prompt
     
