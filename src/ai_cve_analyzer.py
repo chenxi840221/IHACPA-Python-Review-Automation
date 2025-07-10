@@ -151,6 +151,42 @@ class AICVEAnalyzer:
             self.logger.error(f"Error in AI CVE analysis for {package_name}: {e}")
             return f"AI analysis error - manual review required: {str(e)}"
     
+    async def analyze_snyk_result(self, package_name: str, current_version: str, 
+                                snyk_lookup_url: str, raw_snyk_data: str = None) -> str:
+        """
+        Analyze SNYK vulnerability results using AI and assess impact on current version
+        
+        Args:
+            package_name: Name of the Python package
+            current_version: Currently installed version
+            snyk_lookup_url: SNYK vulnerability lookup URL that was searched
+            raw_snyk_data: Raw data from SNYK lookup (optional)
+        
+        Returns:
+            AI-analyzed result with version-specific impact assessment
+        """
+        if not self.enabled:
+            return "AI analysis not available - manual review required"
+            
+        try:
+            # Create SNYK-specific analysis prompt
+            prompt = self._create_snyk_analysis_prompt(
+                package_name, current_version, snyk_lookup_url, raw_snyk_data
+            )
+            
+            # Call OpenAI API
+            response = await self._call_openai_api(prompt)
+            
+            if response:
+                self.logger.debug(f"AI SNYK analysis completed for {package_name} v{current_version}")
+                return response
+            else:
+                return f"AI SNYK analysis failed - manual review required for {package_name} v{current_version}"
+                
+        except Exception as e:
+            self.logger.error(f"Error in AI SNYK analysis for {package_name}: {e}")
+            return f"AI SNYK analysis error - manual review required: {str(e)}"
+    
     def _create_analysis_prompt(self, package_name: str, current_version: str, 
                               cve_lookup_url: str, raw_cve_data: str = None) -> str:
         """Create AI analysis prompt for CVE assessment"""
@@ -187,6 +223,46 @@ GUIDELINES:
         # Add raw CVE data if available
         if raw_cve_data:
             base_prompt += f"\n\nRAW CVE DATA:\n{raw_cve_data[:2000]}..."  # Limit to avoid token limits
+            
+        return base_prompt
+    
+    def _create_snyk_analysis_prompt(self, package_name: str, current_version: str, 
+                                   snyk_lookup_url: str, raw_snyk_data: str = None) -> str:
+        """Create AI analysis prompt for SNYK vulnerability assessment"""
+        
+        base_prompt = f"""
+You are a cybersecurity expert analyzing SNYK vulnerability data for Python packages. 
+
+PACKAGE INFORMATION:
+- Package Name: {package_name}
+- Current Version: {current_version}
+- SNYK Lookup URL: {snyk_lookup_url}
+
+TASK:
+Analyze the SNYK vulnerability information for this specific package and version. SNYK is a specialized security platform that provides detailed vulnerability analysis for open source packages. Provide a concise assessment that includes:
+
+1. VULNERABILITY STATUS: Are there any vulnerabilities in SNYK database that affect the current version {current_version}?
+2. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest severity level according to SNYK?
+3. VERSION IMPACT: Does the current version {current_version} have known vulnerabilities in SNYK?
+4. RISK ASSESSMENT: What is the overall security risk level for this version based on SNYK data?
+5. RECOMMENDATION: Should this version be updated or is it safe to use according to SNYK analysis?
+
+RESPONSE FORMAT:
+Provide a concise response (2-3 sentences max) in this format:
+"SNYK Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+
+GUIDELINES:
+- Be specific about version impact based on SNYK vulnerability database
+- Focus on the current version {current_version}, not future versions
+- Use clear, actionable language for security recommendations
+- If no specific version information is available, state "version impact unclear"
+- Consider SNYK's reputation for accurate vulnerability detection
+- Prioritize security over convenience
+"""
+        
+        # Add raw SNYK data if available
+        if raw_snyk_data:
+            base_prompt += f"\n\nRAW SNYK DATA:\n{raw_snyk_data[:2000]}..."  # Limit to avoid token limits
             
         return base_prompt
     
