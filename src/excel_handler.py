@@ -246,6 +246,9 @@ class ExcelHandler:
                 return 'security_risk'
             elif any(safe_keyword in new_str for safe_keyword in ['none found', 'not found', 'no published', 'not_found', 'no vulnerabilities']):
                 return 'new_data'
+            elif 'manual review required' in new_str:
+                # Handle manual review required messages - treat as general updates
+                return 'updated'
             else:
                 return 'updated'
         
@@ -350,7 +353,7 @@ class ExcelHandler:
                         continue
                     
                     # Determine what the formatting should be
-                    expected_format_type = self._determine_color_type(field, cell.value, "")
+                    expected_format_type = self._determine_format_type_for_content(field, cell.value)
                     
                     if expected_format_type in expected_formats:
                         expected = expected_formats[expected_format_type]
@@ -455,6 +458,34 @@ class ExcelHandler:
             pass
         return '000000'  # Default black
     
+    def _determine_format_type_for_content(self, field: str, cell_value: Any) -> str:
+        """Determine format type based on cell content for format checking"""
+        if not cell_value:
+            return 'updated'
+        
+        value_str = str(cell_value).lower()
+        
+        # Security risk patterns
+        if any(keyword in value_str for keyword in [
+            'found', 'vulnerability', 'vulnerabilities', 'security risk', 'cve-', 
+            'severity: high', 'severity: critical', 'severity: medium', 'action_needed',
+            'affected', 'exploitable'
+        ]) and not any(safe_keyword in value_str for safe_keyword in [
+            'none found', 'not found', 'no published', 'not_found'
+        ]):
+            return 'security_risk'
+        
+        # Safe content patterns
+        elif any(safe_keyword in value_str for safe_keyword in [
+            'none found', 'not found', 'no published', 'not_found', 'no vulnerabilities',
+            'no published security advisories'
+        ]):
+            return 'new_data'
+        
+        # Manual review or general updates
+        else:
+            return 'updated'
+
     def _apply_cell_formatting(self, cell, format_type: str):
         """Apply specific formatting to a cell"""
         if format_type in self.colors and format_type in self.font_colors:
