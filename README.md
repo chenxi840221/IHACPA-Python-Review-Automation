@@ -21,16 +21,24 @@ This project automates the cybersecurity vulnerability review process for Python
 
 ### Multi-Database Vulnerability Scanning
 - **NIST NVD** (National Vulnerability Database)
-- **MITRE CVE** database
+- **MITRE CVE** database with **AI-powered analysis**
 - **SNYK** Vulnerability Database
 - **Exploit Database**
 - **GitHub Security Advisories**
+
+### AI-Powered CVE Analysis ✨ **NEW**
+- **OpenAI GPT-4** integration for intelligent CVE assessment
+- **Version-specific vulnerability impact analysis**
+- **Automated severity assessment** (Critical/High/Medium/Low)
+- **Contextual security recommendations** based on current package version
+- **Smart vulnerability filtering** - eliminates false positives
 
 ### Intelligent Analysis and Recommendations
 - Risk assessment based on version gaps and vulnerabilities
 - Automated recommendations for package updates
 - Prioritization of critical security issues
 - Executive summary reporting
+- **AI-enhanced MITRE CVE analysis** for precise threat assessment
 
 ## Excel File Structure
 
@@ -55,7 +63,7 @@ The system works with an Excel file containing these key columns:
 | O | NIST NVD Lookup URL | **Automated** |
 | P | NIST NVD Results | **Automated** |
 | Q | MITRE CVE Lookup URL | **Automated** |
-| R | MITRE CVE Results | **Automated** |
+| R | MITRE CVE Results | **Automated + AI Analysis** ✨ |
 | S | SNYK Lookup URL | **Automated** |
 | T | SNYK Results | **Automated** |
 | U | Exploit DB Lookup URL | **Automated** |
@@ -70,8 +78,51 @@ The system works with an Excel file containing these key columns:
 pip install -r requirements.txt
 
 # Or install minimal requirements for production
-pip install openpyxl==3.1.5 requests==2.32.4 aiohttp pyyaml python-dotenv python-dateutil certifi charset-normalizer
+pip install openpyxl==3.1.5 requests==2.32.4 aiohttp pyyaml python-dotenv python-dateutil certifi charset-normalizer openai
 ```
+
+### AI-Powered CVE Analysis Setup ✨
+
+The system supports both **Standard OpenAI** and **Azure OpenAI Service**:
+
+#### **Option 1: Standard OpenAI** 
+1. **Get OpenAI API Key**: Visit [OpenAI API](https://platform.openai.com/api-keys) and create an API key
+2. **Set Environment Variable**:
+   ```bash
+   export OPENAI_API_KEY="sk-your-openai-key-here"
+   ```
+
+#### **Option 2: Azure OpenAI Service** (Recommended for Enterprise)
+1. **Azure OpenAI Resource**: Ensure you have an Azure OpenAI resource deployed
+2. **Get API Key**: From Azure Portal → Your OpenAI Resource → Keys and Endpoint
+3. **Set Environment Variables**:
+   ```bash
+   export AZURE_OPENAI_KEY="your-azure-api-key-here"
+   export AZURE_OPENAI_ENDPOINT="https://your-resource-name.openai.azure.com/"
+   export AZURE_OPENAI_MODEL="gpt-4o-mini"  # or your deployment name
+   ```
+   Or on Windows:
+   ```cmd
+   set AZURE_OPENAI_KEY=your-azure-api-key-here
+   set AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+   set AZURE_OPENAI_MODEL=gpt-4o-mini
+   ```
+
+4. **Update .env file** (alternative to environment variables):
+   ```env
+   # Azure OpenAI Configuration
+   AZURE_OPENAI_KEY=your-azure-api-key-here
+   AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+   AZURE_OPENAI_MODEL=gpt-4o-mini
+   AZURE_OPENAI_API_VERSION=2024-02-15-preview
+   ```
+
+5. **Test AI Analysis**:
+   ```bash
+   python test_ai_cve.py
+   ```
+
+> **Note**: AI analysis is optional. If no API key is provided, the system will fallback to manual review notices for MITRE CVE results. The system automatically detects whether you're using Standard OpenAI or Azure OpenAI based on your configuration.
 
 ### Quick Start Commands
 

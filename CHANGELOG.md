@@ -2,6 +2,84 @@
 
 All notable changes to the IHACPA Python Package Review Automation project will be documented in this file.
 
+## [1.2.1] - 2025-07-10 - Azure OpenAI Support ✨
+
+### 🤖 Enhanced AI Integration: Azure OpenAI Service Support
+- **Azure OpenAI Compatibility**: Full support for Azure OpenAI Service alongside standard OpenAI
+- **Automatic Detection**: System automatically detects Azure vs Standard OpenAI based on configuration
+- **Enterprise Ready**: Azure OpenAI provides enterprise-grade security and compliance
+- **Dual Configuration**: Supports both standard OpenAI and Azure OpenAI configurations simultaneously
+
+### 🛠️ Technical Enhancements
+- **AzureOpenAI Client**: Updated `ai_cve_analyzer.py` to use `openai.AzureOpenAI()` for Azure services
+- **Enhanced Configuration**: Added Azure-specific configuration options (endpoint, API version, deployment)
+- **Auto-Detection Logic**: Intelligent detection of service type based on API key format and endpoint
+- **Improved Error Handling**: Better error messages for Azure-specific configuration issues
+
+### ⚙️ Configuration Updates
+- **Azure Environment Variables**: Support for `AZURE_OPENAI_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_MODEL`
+- **Flexible .env Configuration**: Updated .env file format to support both services
+- **Backward Compatibility**: Existing OpenAI configurations continue to work unchanged
+- **Configuration Validation**: Enhanced validation for Azure-specific requirements
+
+### 📖 Documentation Improvements
+- **Azure Setup Guide**: Complete setup instructions for Azure OpenAI Service
+- **Dual Configuration**: Clear documentation for both Standard and Azure OpenAI options
+- **Environment Examples**: Comprehensive environment variable examples
+- **Troubleshooting**: Azure-specific troubleshooting information
+
+### 🎯 Benefits for Enterprise Users
+- **Enhanced Security**: Azure OpenAI provides additional enterprise security features
+- **Compliance**: Better compliance with enterprise data governance requirements
+- **Regional Deployment**: Ability to use region-specific Azure OpenAI deployments
+- **Cost Management**: Integration with Azure billing and cost management tools
+
+## [1.2.0] - 2025-07-10 - AI-Powered CVE Analysis ✨
+
+### 🤖 Major New Feature: AI-Powered CVE Analysis
+- **OpenAI GPT-4 Integration**: Added intelligent CVE analysis for MITRE CVE database (Column R)
+- **Version-Specific Impact Assessment**: AI analyzes vulnerabilities specific to the current installed version
+- **Automated Severity Classification**: AI determines Critical/High/Medium/Low severity levels
+- **Smart Vulnerability Filtering**: Reduces false positives through contextual analysis
+- **Actionable Security Recommendations**: AI provides specific recommendations based on vulnerability findings
+
+### 🛠️ Technical Implementation
+- **New Module**: `src/ai_cve_analyzer.py` - Core AI analysis functionality
+- **Enhanced VulnerabilityScanner**: Updated `scan_mitre_cve()` method with AI integration
+- **Configuration Support**: Added OpenAI API key support in configuration system
+- **Environment Variable Support**: Automatically loads `OPENAI_API_KEY` from environment
+- **Graceful Fallback**: System operates normally without API key (manual review notices)
+
+### 📊 Analysis Features
+- **Intelligent Prompt Engineering**: Specialized prompts for cybersecurity vulnerability assessment
+- **Rate Limiting**: Built-in API rate limiting to respect OpenAI usage limits
+- **Error Handling**: Comprehensive error handling with fallback to manual review
+- **Batch Processing**: Efficient processing of multiple packages
+- **Response Validation**: Validates AI responses for consistency and accuracy
+
+### 🧪 Testing & Validation
+- **Test Script**: Added `test_ai_cve.py` for validating AI analysis functionality
+- **Real Package Testing**: Tested with known vulnerable packages (aiohttp, requests)
+- **Performance Optimized**: Async processing with configurable timeouts
+- **Production Ready**: Thoroughly tested integration with existing workflow
+
+### 📖 Documentation Updates
+- **README Enhancement**: Added AI features section with setup instructions
+- **API Key Setup Guide**: Step-by-step OpenAI API configuration
+- **Feature Highlighting**: Updated Excel column table to show AI-enhanced analysis
+- **Usage Examples**: Added test script documentation and examples
+
+### ⚙️ Configuration Enhancements
+- **OpenAI API Key Support**: Added `openai_api_key` field to configuration
+- **Automatic Environment Loading**: Loads API key from `OPENAI_API_KEY` environment variable
+- **Backward Compatibility**: Fully compatible with existing configurations
+
+### 🎯 Security Benefits
+- **Reduced Manual Review Time**: AI pre-analyzes CVE results for faster human review
+- **Improved Accuracy**: AI identifies version-specific vulnerabilities more precisely
+- **Risk Prioritization**: AI helps prioritize high-risk packages first
+- **Contextual Analysis**: Considers package version when assessing vulnerability impact
+
 ## [1.1.0] - 2025-07-09 - Date Published Logic Fix & "Not Available" Feature
 
 ### 🚀 Major Enhancements
