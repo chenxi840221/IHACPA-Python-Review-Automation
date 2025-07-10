@@ -5,7 +5,7 @@ Handles reading and writing Excel files for the package review process
 """
 
 import openpyxl
-from openpyxl.styles import PatternFill, Font
+from openpyxl.styles import PatternFill, Font, Alignment
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
@@ -64,7 +64,7 @@ class ExcelHandler:
         # Font color definitions that complement the fill colors
         self.font_colors = {
             'updated': Font(color="0066CC", bold=True),           # Bright blue (bold) for light blue background
-            'new_data': Font(color="008000", bold=True),          # Dark green (bold) for light green background
+            'new_data': Font(color="006600", bold=True),          # Medium green (bold) for light green background - better contrast
             'security_risk': Font(color="CC0000", bold=True),     # Bright red (bold) for light red background
             'version_update': Font(color="FF6600", bold=True),    # Bright orange (bold) for light orange background
             'github_added': Font(color="6600CC", bold=True),      # Bright purple (bold) for light purple background
@@ -156,12 +156,56 @@ class ExcelHandler:
                         # Apply color highlighting based on field type and content
                         color_type = self._determine_color_type(field, value, original_value)
                         if color_type:
+                            # Apply fill color
                             cell.fill = self.colors[color_type]
-                            # Apply corresponding font color
-                            cell.font = self.font_colors.get(color_type, self.font_colors['default'])
+                            
+                            # Preserve existing alignment and ensure proper formatting
+                            existing_alignment = cell.alignment
+                            new_alignment = Alignment(
+                                wrap_text=True,  # Ensure wrap text is enabled for long content
+                                horizontal=existing_alignment.horizontal or 'center',  # Preserve or set center alignment
+                                vertical=existing_alignment.vertical or 'center',  # Preserve or set center alignment
+                                text_rotation=existing_alignment.text_rotation,
+                                indent=existing_alignment.indent
+                            )
+                            cell.alignment = new_alignment
+                            
+                            # Apply font with proper inheritance
+                            existing_font = cell.font
+                            target_font = self.font_colors.get(color_type, self.font_colors['default'])
+                            new_font = Font(
+                                color=target_font.color,
+                                bold=target_font.bold,  # Explicitly set bold from our definition
+                                italic=existing_font.italic,  # Preserve existing italic
+                                size=existing_font.size or 11.0,  # Preserve existing size or default to 11
+                                name=existing_font.name or 'Calibri'  # Preserve existing font or default
+                            )
+                            cell.font = new_font
                         else:
-                            # Apply default font color for cells without special fill
-                            cell.font = self.font_colors['default']
+                            # Apply default font but preserve alignment
+                            existing_alignment = cell.alignment
+                            if existing_alignment.wrap_text is None:
+                                # Only set alignment if wrap_text isn't already set
+                                new_alignment = Alignment(
+                                    wrap_text=True,
+                                    horizontal=existing_alignment.horizontal or 'center',
+                                    vertical=existing_alignment.vertical or 'center',
+                                    text_rotation=existing_alignment.text_rotation,
+                                    indent=existing_alignment.indent
+                                )
+                                cell.alignment = new_alignment
+                            
+                            # Apply default font with proper inheritance
+                            existing_font = cell.font
+                            default_font = self.font_colors['default']
+                            new_font = Font(
+                                color=default_font.color,
+                                bold=default_font.bold,
+                                italic=existing_font.italic,
+                                size=existing_font.size or 11.0,
+                                name=existing_font.name or 'Calibri'
+                            )
+                            cell.font = new_font
                             
                         # Track the change for reporting
                         self.changed_cells.append({
