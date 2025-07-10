@@ -274,6 +274,218 @@ class ExcelHandler:
         else:
             return 'updated'
     
+    def check_and_fix_formatting(self, dry_run: bool = False) -> Dict[str, Any]:
+        """
+        Check for formatting issues and fix them
+        
+        Args:
+            dry_run: If True, only report issues without fixing them
+            
+        Returns:
+            Dictionary with check results and fixes applied
+        """
+        if not self.worksheet:
+            return {'error': 'No worksheet loaded'}
+        
+        results = {
+            'total_packages_checked': 0,
+            'formatting_issues_found': 0,
+            'fixes_applied': 0,
+            'issues_by_column': {},
+            'fixes_by_package': []
+        }
+        
+        try:
+            # Define expected formatting for each field type
+            expected_formats = {
+                'security_risk': {
+                    'fill_color': 'FFE6E6',
+                    'font_color': 'CC0000',
+                    'bold': True
+                },
+                'new_data': {
+                    'fill_color': 'E6FFE6',
+                    'font_color': '006600',
+                    'bold': True
+                },
+                'version_update': {
+                    'fill_color': 'FFF0E6',
+                    'font_color': 'FF6600',
+                    'bold': True
+                },
+                'github_added': {
+                    'fill_color': 'F0E6FF',
+                    'font_color': '6600CC',
+                    'bold': True
+                },
+                'updated': {
+                    'fill_color': 'E6F3FF',
+                    'font_color': '0066CC',
+                    'bold': True
+                }
+            }
+            
+            # Fields that should have security risk formatting when containing vulnerabilities
+            security_fields = ['nist_nvd_result', 'mitre_cve_result', 'snyk_result', 'exploit_db_result', 'github_advisory_result']
+            
+            # Check each row for formatting issues
+            for row in range(self.DATA_START_ROW, self.worksheet.max_row + 1):
+                package_name_cell = self.worksheet.cell(row=row, column=self.COLUMN_MAPPING['package_name'])
+                package_name = str(package_name_cell.value).strip() if package_name_cell.value else ""
+                
+                if not package_name:
+                    continue
+                    
+                results['total_packages_checked'] += 1
+                package_fixes = []
+                
+                # Check each security field
+                for field in security_fields:
+                    column = self.COLUMN_MAPPING[field]
+                    cell = self.worksheet.cell(row=row, column=column)
+                    cell_value = str(cell.value).lower() if cell.value else ""
+                    
+                    # Skip empty cells
+                    if not cell_value or cell_value in ['none', 'null', '']:
+                        continue
+                    
+                    # Determine what the formatting should be
+                    expected_format_type = self._determine_color_type(field, cell.value, "")
+                    
+                    if expected_format_type in expected_formats:
+                        expected = expected_formats[expected_format_type]
+                        
+                        # Check current formatting
+                        current_fill = self._get_fill_color(cell)
+                        current_font = self._get_font_color(cell)
+                        current_bold = cell.font.bold if cell.font else False
+                        
+                        # Check if formatting needs fixing
+                        needs_fix = False
+                        issues = []
+                        
+                        if current_fill != expected['fill_color']:
+                            issues.append(f"fill_color: {current_fill} → {expected['fill_color']}")
+                            needs_fix = True
+                            
+                        if current_font != expected['font_color']:
+                            issues.append(f"font_color: {current_font} → {expected['font_color']}")
+                            needs_fix = True
+                            
+                        if current_bold != expected['bold']:
+                            issues.append(f"bold: {current_bold} → {expected['bold']}")
+                            needs_fix = True
+                        
+                        if needs_fix:
+                            results['formatting_issues_found'] += 1
+                            
+                            # Track issues by column
+                            if field not in results['issues_by_column']:
+                                results['issues_by_column'][field] = 0
+                            results['issues_by_column'][field] += 1
+                            
+                            issue_info = {
+                                'row': row,
+                                'column': field,
+                                'value': str(cell.value)[:50] + "..." if len(str(cell.value)) > 50 else str(cell.value),
+                                'issues': issues,
+                                'expected_format': expected_format_type
+                            }
+                            
+                            # Apply fix if not dry run
+                            if not dry_run:
+                                self._apply_cell_formatting(cell, expected_format_type)
+                                results['fixes_applied'] += 1
+                                issue_info['status'] = 'FIXED'
+                                self.logger.info(f"Fixed formatting for {package_name} {field}: {', '.join(issues)}")
+                            else:
+                                issue_info['status'] = 'NEEDS_FIX'
+                            
+                            package_fixes.append(issue_info)
+                
+                if package_fixes:
+                    results['fixes_by_package'].append({
+                        'package_name': package_name,
+                        'row': row,
+                        'fixes': package_fixes
+                    })
+            
+            # Log summary
+            self.logger.info(f"Format check completed: {results['total_packages_checked']} packages checked, "
+                           f"{results['formatting_issues_found']} issues found, "
+                           f"{results['fixes_applied']} fixes applied")
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in format check: {e}")
+            return {'error': str(e)}
+    
+    def _get_fill_color(self, cell) -> str:
+        """Get the fill color of a cell as hex string"""
+        try:
+            if cell.fill and hasattr(cell.fill, 'start_color') and cell.fill.start_color:
+                color = cell.fill.start_color
+                if hasattr(color, 'rgb') and color.rgb:
+                    # Handle different color formats
+                    if isinstance(color.rgb, str):
+                        return color.rgb[-6:]  # Remove FF prefix if present
+                    else:
+                        return str(color.rgb)[-6:]  # Convert to string and get last 6 chars
+                elif hasattr(color, 'value') and color.value:
+                    return str(color.value)[-6:]
+        except Exception:
+            pass
+        return 'FFFFFF'  # Default white
+    
+    def _get_font_color(self, cell) -> str:
+        """Get the font color of a cell as hex string"""
+        try:
+            if cell.font and cell.font.color:
+                color = cell.font.color
+                if hasattr(color, 'rgb') and color.rgb:
+                    # Handle different color formats
+                    if isinstance(color.rgb, str):
+                        return color.rgb[-6:]  # Remove FF prefix if present
+                    else:
+                        return str(color.rgb)[-6:]  # Convert to string and get last 6 chars
+                elif hasattr(color, 'value') and color.value:
+                    return str(color.value)[-6:]
+        except Exception:
+            pass
+        return '000000'  # Default black
+    
+    def _apply_cell_formatting(self, cell, format_type: str):
+        """Apply specific formatting to a cell"""
+        if format_type in self.colors and format_type in self.font_colors:
+            # Get existing font properties
+            existing_font = cell.font
+            existing_alignment = cell.alignment
+            
+            # Apply fill
+            cell.fill = self.colors[format_type]
+            
+            # Apply font with inheritance
+            target_font = self.font_colors[format_type]
+            new_font = Font(
+                color=target_font.color,
+                bold=target_font.bold,
+                italic=existing_font.italic if existing_font else False,
+                size=existing_font.size if existing_font and existing_font.size else 11.0,
+                name=existing_font.name if existing_font and existing_font.name else 'Calibri'
+            )
+            cell.font = new_font
+            
+            # Preserve alignment with wrap text
+            new_alignment = Alignment(
+                wrap_text=True,
+                horizontal=existing_alignment.horizontal if existing_alignment else 'center',
+                vertical=existing_alignment.vertical if existing_alignment else 'center',
+                text_rotation=existing_alignment.text_rotation if existing_alignment else 0,
+                indent=existing_alignment.indent if existing_alignment else 0
+            )
+            cell.alignment = new_alignment
+
     def save_workbook(self, backup: bool = True) -> bool:
         """Save the Excel workbook with optional backup"""
         if not self.workbook:

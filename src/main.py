@@ -457,6 +457,107 @@ class IHACPAAutomation:
             self.error_handler.handle_config_error("generate_changes_report", e)
             return False
     
+    def run_format_check(self, fix: bool = True) -> bool:
+        """
+        Run format check and optionally fix formatting issues
+        
+        Args:
+            fix: If True, fix formatting issues. If False, only report them.
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if not self.excel_handler:
+                self.logger.error("Excel handler not initialized")
+                return False
+            
+            self.logger.info("🔍 Running format check...")
+            
+            # Run format check
+            results = self.excel_handler.check_and_fix_formatting(dry_run=not fix)
+            
+            if 'error' in results:
+                self.logger.error(f"Format check failed: {results['error']}")
+                return False
+            
+            # Log summary
+            self.logger.info(f"📊 Format check completed:")
+            self.logger.info(f"   Packages checked: {results['total_packages_checked']}")
+            self.logger.info(f"   Issues found: {results['formatting_issues_found']}")
+            
+            if fix:
+                self.logger.info(f"   Fixes applied: {results['fixes_applied']}")
+            else:
+                self.logger.info("   No fixes applied (dry run mode)")
+            
+            # Report issues by column
+            if results['issues_by_column']:
+                self.logger.info("   Issues by column:")
+                for column, count in results['issues_by_column'].items():
+                    self.logger.info(f"     {column}: {count} issues")
+            
+            # Generate detailed report
+            if results['fixes_by_package']:
+                report_path = f"data/output/format_check_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                self._generate_format_check_report(results, report_path)
+                self.logger.info(f"   Detailed report: {report_path}")
+            
+            return True
+            
+        except Exception as e:
+            self.error_handler.handle_config_error("format_check", e) if self.error_handler else None
+            return False
+    
+    def _generate_format_check_report(self, results: Dict[str, Any], output_path: str):
+        """Generate detailed format check report"""
+        try:
+            report = []
+            report.append("IHACPA FORMAT CHECK REPORT")
+            report.append("=" * 60)
+            report.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report.append(f"Excel file: {self.excel_handler.file_path}")
+            report.append("")
+            
+            # Summary
+            report.append("SUMMARY:")
+            report.append("-" * 30)
+            report.append(f"Total packages checked: {results['total_packages_checked']}")
+            report.append(f"Formatting issues found: {results['formatting_issues_found']}")
+            report.append(f"Fixes applied: {results['fixes_applied']}")
+            report.append("")
+            
+            # Issues by column
+            if results['issues_by_column']:
+                report.append("ISSUES BY COLUMN:")
+                report.append("-" * 30)
+                for column, count in sorted(results['issues_by_column'].items()):
+                    report.append(f"{column}: {count} issues")
+                report.append("")
+            
+            # Detailed fixes by package
+            if results['fixes_by_package']:
+                report.append("DETAILED FIXES BY PACKAGE:")
+                report.append("-" * 30)
+                
+                for package_info in results['fixes_by_package']:
+                    report.append(f"📦 {package_info['package_name']} (Row {package_info['row']}):")
+                    
+                    for fix in package_info['fixes']:
+                        report.append(f"  🔧 {fix['column']} - {fix['status']}")
+                        report.append(f"     Value: {fix['value']}")
+                        report.append(f"     Expected format: {fix['expected_format']}")
+                        report.append(f"     Issues: {', '.join(fix['issues'])}")
+                        report.append("")
+            
+            # Write report
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(report))
+                
+        except Exception as e:
+            self.logger.error(f"Error generating format check report: {e}")
+
     async def cleanup(self):
         """Cleanup resources"""
         if self.excel_handler:
@@ -549,6 +650,18 @@ Examples:
     )
     
     parser.add_argument(
+        '--format-check',
+        action='store_true',
+        help='Run format check and fix formatting issues'
+    )
+    
+    parser.add_argument(
+        '--format-check-only',
+        action='store_true',
+        help='Run format check only (dry run - report issues without fixing)'
+    )
+    
+    parser.add_argument(
         '--dry-run',
         action='store_true',
         help='Show what would be processed without making changes'
@@ -599,8 +712,22 @@ async def main():
             print("Failed to setup automation")
             return 1
         
+        # Handle format check operations
+        if args.format_check or args.format_check_only:
+            automation.logger.info("Running format check...")
+            success = automation.run_format_check(fix=args.format_check)
+            
+            if not success:
+                automation.logger.error("Format check failed")
+                return 1
+            
+            # If format check only, save and exit
+            if args.format_check_only:
+                automation.logger.info("Format check completed")
+                return 0
+        
         # Process packages (unless report-only or changes-only)
-        if not args.report_only and not args.changes_only:
+        if not args.report_only and not args.changes_only and not args.format_check_only:
             if args.dry_run:
                 automation.logger.info("DRY RUN MODE - No changes will be made")
                 # In dry-run mode, still process packages but don't save changes
@@ -623,6 +750,11 @@ async def main():
                 if not success:
                     automation.logger.error("Package processing failed")
                     return 1
+                
+                # Run format check after processing if enabled
+                if args.format_check:
+                    automation.logger.info("Running post-processing format check...")
+                    automation.run_format_check(fix=True)
         
         # Generate report
         if config.output.create_reports and not args.changes_only:
