@@ -147,10 +147,40 @@ class Config:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
     
+    # API Keys and external services
+    openai_api_key: Optional[str] = None
+    azure_openai_endpoint: Optional[str] = None
+    azure_openai_model: Optional[str] = None
+    azure_openai_api_version: Optional[str] = None
+    
     def __post_init__(self):
         """Post-initialization setup"""
         self.loaded_from: Optional[str] = None
         self.loaded_at: Optional[datetime] = None
+        
+        # Load API keys from environment if not set
+        if not self.openai_api_key:
+            self.openai_api_key = os.getenv('OPENAI_API_KEY') or os.getenv('AZURE_OPENAI_KEY')
+        
+        # Load Azure OpenAI settings from environment if not set
+        if not self.azure_openai_endpoint:
+            self.azure_openai_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        
+        if not self.azure_openai_model:
+            self.azure_openai_model = os.getenv('AZURE_OPENAI_MODEL')
+            
+        if not self.azure_openai_api_version:
+            self.azure_openai_api_version = os.getenv('AZURE_OPENAI_API_VERSION')
+            
+        # Auto-detect Azure if endpoint is provided or key doesn't start with sk-
+        if self.azure_openai_endpoint or (self.openai_api_key and not self.openai_api_key.startswith('sk-')):
+            self.is_azure_openai = True
+        else:
+            self.is_azure_openai = False
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value by key"""
+        return getattr(self, key, default)
 
 
 class ConfigManager:

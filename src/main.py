@@ -6,10 +6,18 @@ Handles CLI interface and orchestrates the complete automation process
 
 import asyncio
 import argparse
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List, Dict, Any
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / '.env')
+except ImportError:
+    pass  # dotenv is optional
 
 # Add src directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -86,11 +94,18 @@ class IHACPAAutomation:
                 max_retries=self.config.processing.retry_attempts
             )
             
-            # Setup vulnerability scanner
+            # Setup vulnerability scanner with OpenAI/Azure API configuration
+            openai_api_key = self.config.get('openai_api_key') or None
+            azure_endpoint = self.config.get('azure_openai_endpoint') or None
+            azure_model = self.config.get('azure_openai_model') or os.getenv('AZURE_OPENAI_MODEL')
+            
             self.vulnerability_scanner = VulnerabilityScanner(
                 timeout=self.config.processing.request_timeout,
                 max_retries=self.config.processing.retry_attempts,
-                rate_limit=self.config.processing.rate_limit_delay
+                rate_limit=self.config.processing.rate_limit_delay,
+                openai_api_key=openai_api_key,
+                azure_endpoint=azure_endpoint,
+                azure_model=azure_model
             )
             
             self.logger.info("All components initialized successfully")
@@ -258,9 +273,11 @@ class IHACPAAutomation:
                         package_name, current_version, pypi_info.get('latest_version', '')
                     )
             
-            # Get vulnerability information
+            # Get vulnerability information (include current_version for AI analysis)
             vuln_results = await self.vulnerability_scanner.scan_all_databases(
-                package_name, pypi_info.get('github_url') if pypi_info else None
+                package_name, 
+                github_url=pypi_info.get('github_url') if pypi_info else None,
+                current_version=current_version
             )
             
             # Update vulnerability data
