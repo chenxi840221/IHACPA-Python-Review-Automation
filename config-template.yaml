@@ -1,0 +1,101 @@
+# IHACPA Python Package Review Automation - Configuration Template
+# Copy this file to 'config.yaml' and customize your settings
+
+# Application Information (no changes needed)
+app:
+  name: "IHACPA Python Package Review Automation"
+  version: "1.5.0"
+
+# Azure OpenAI Configuration (REQUIRED for AI analysis)
+azure_openai:
+  # Your Azure OpenAI API key (keep this secret!)
+  api_key: ""
+  
+  # Your Azure OpenAI endpoint URL
+  endpoint: "https://your-resource-name.openai.azure.com/"
+  
+  # Model deployment name
+  model: "gpt-4"
+  
+  # API version (usually no change needed)
+  api_version: "2024-02-01"
+
+# File Processing Settings
+files:
+  # Default input file (optional - can select in GUI)
+  default_input_path: ""
+  
+  # Default output file (optional - can select in GUI)  
+  default_output_path: ""
+  
+  # Create backup before processing
+  create_backup: true
+  
+  # Auto-generate output filename if not specified
+  auto_generate_output: true
+
+# Processing Options
+processing:
+  # Run format check and fix after processing
+  format_check: true
+  
+  # Enable verbose logging
+  verbose_logging: true
+  
+  # Number of packages to process in each batch
+  batch_size: 10
+  
+  # Delay between API calls (seconds) - increase if hitting rate limits
+  api_delay: 0.5
+  
+  # Skip packages that are already complete
+  skip_complete: true
+
+# Vulnerability Scanning Settings
+scanning:
+  # Enable/disable specific vulnerability databases
+  enable_github_advisory: true
+  enable_nist_nvd: true
+  enable_mitre_cve: true
+  enable_snyk: true
+  enable_exploit_db: true
+  
+  # Enable AI analysis of vulnerabilities
+  enable_ai_analysis: true
+
+# GUI Settings
+gui:
+  # Window size
+  window_width: 900
+  window_height: 700
+  
+  # Auto-save settings when you close the application
+  auto_save_settings: true
+
+# Logging Configuration
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # Save logs to file
+  log_to_file: true
+  
+  # Log file name
+  log_file: "ihacpa_automation.log"
+
+# Network Settings (for corporate environments)
+network:
+  # HTTP/HTTPS proxy settings (if required by your network)
+  proxy:
+    http: ""     # Example: "http://proxy.company.com:8080"
+    https: ""    # Example: "https://proxy.company.com:8080"
+
+# Advanced Settings (usually no changes needed)
+advanced:
+  # Custom timeout settings per API (seconds)
+  api_timeouts:
+    github_advisory: 30
+    nist_nvd: 45
+    mitre_cve: 30
+    snyk: 30
+    exploit_db: 25

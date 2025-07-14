@@ -1,0 +1,21 @@
+# Requirements for building the Windows executable
+# Install with: pip install -r requirements-build.txt
+
+# Core dependencies (same as main requirements)
+openpyxl==3.1.5
+requests==2.32.4
+aiohttp==3.11.12
+pyyaml==6.0.2
+python-dotenv==1.0.1
+python-dateutil==2.9.0.post0
+certifi>=2024.0.0
+charset-normalizer==3.4.1
+openai==1.59.7
+
+# Build tools
+pyinstaller==6.11.1
+pyinstaller-hooks-contrib==2025.2
+
+# Windows specific
+pywin32-ctypes; sys_platform == 'win32'
+pefile; sys_platform == 'win32'

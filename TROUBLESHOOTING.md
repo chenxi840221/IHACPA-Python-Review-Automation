@@ -1,8 +1,48 @@
 # Troubleshooting Guide
 
-This guide covers common issues and their solutions for the IHACPA Python Package Review Automation system v1.5.0.
+This guide covers common issues and their solutions for the IHACPA Python Package Review Automation system v1.5.1.
 
 ## Common Issues and Solutions
+
+### 0. Recent Issues Fixed in v1.5.1 ✅
+
+#### Fixed: "Cannot convert [...] to Excel" Error
+```bash
+ERROR: Failed to update backports.weakref: Cannot convert ['Development Status :: 6 - Mature', ...] to Excel
+```
+
+**Status:** ✅ **FIXED** - This error has been resolved in v1.5.1.
+
+**What was the issue:** The PyPI API was returning classifier lists instead of single development status strings.
+
+**How it was fixed:** 
+- Enhanced PyPI client to extract single development status from classifiers
+- Added data validation to prevent list values from being written to Excel
+- Improved error handling with specific error messages
+
+#### Fixed: START PROCESSING Button Not Visible
+
+**Status:** ✅ **FIXED** - Button is now clearly visible in the GUI.
+
+**What was the issue:** Button layout and styling problems causing visibility issues.
+
+**How it was fixed:**
+- Switched to grid layout for better control
+- Removed problematic styling attributes
+- Added proper padding and sizing
+- Enhanced button grouping in "Actions" frame
+
+#### Fixed: Package Update Failures
+
+**Status:** ✅ **FIXED** - Significantly improved success rates.
+
+**What was the issue:** High failure rates during package processing.
+
+**How it was fixed:**
+- Better timeout management (15s without AI, 30s with AI)
+- Enhanced error recovery mechanisms
+- Improved null value handling
+- More detailed error reporting
 
 ### 1. Azure OpenAI Configuration Issues
 

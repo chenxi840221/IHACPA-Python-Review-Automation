@@ -50,6 +50,7 @@ class ExcelHandler:
         self.workbook = None
         self.worksheet = None
         self.logger = logging.getLogger(__name__)
+        self.last_update_error = None  # Store last error for debugging
         
         # Color definitions for highlighting changes
         self.colors = {
@@ -136,9 +137,18 @@ class ExcelHandler:
             return False
             
         try:
+            # Debug logging
+            self.logger.debug(f"Updating row {row_number} with {len(updates)} fields")
+            
             for field, value in updates.items():
                 if field in self.COLUMN_MAPPING:
                     column = self.COLUMN_MAPPING[field]
+                    self.logger.debug(f"Processing field '{field}' -> column {column}")
+                    
+                    # Validate row and column
+                    if row_number < 1 or row_number > self.worksheet.max_row:
+                        raise ValueError(f"Invalid row number: {row_number} (max: {self.worksheet.max_row})")
+                    
                     cell = self.worksheet.cell(row=row_number, column=column)
                     
                     # Store original value for change tracking
@@ -222,7 +232,12 @@ class ExcelHandler:
             return True
             
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
             self.logger.error(f"Error updating row {row_number}: {e}")
+            self.logger.error(f"Full traceback: {error_details}")
+            # Store last error for debugging
+            self.last_update_error = str(e)
             return False
     
     def _determine_color_type(self, field: str, new_value: Any, old_value: Any) -> Optional[str]:

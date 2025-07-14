@@ -1,0 +1,261 @@
+# IHACPA Python Package Review Automation - Configuration File
+# This file contains all environment variables and settings for the standalone application
+
+# Application Information
+app:
+  name: "IHACPA Python Package Review Automation"
+  version: "1.5.0"
+  description: "Automated vulnerability scanning for 486 Python packages"
+
+# Azure OpenAI Configuration
+azure_openai:
+  # API Key for Azure OpenAI (required for AI analysis)
+  api_key: ""
+  
+  # Azure OpenAI endpoint URL
+  endpoint: "https://your-resource-name.openai.azure.com/"
+  
+  # Model deployment name
+  model: "gpt-4"
+  
+  # API version
+  api_version: "2024-02-01"
+  
+  # Timeout settings (in seconds)
+  timeout: 30
+  
+  # Maximum retries for API calls
+  max_retries: 3
+
+# File Processing Settings
+files:
+  # Default input file path (can be overridden in GUI)
+  default_input_path: ""
+  
+  # Default output file path (can be overridden in GUI)
+  default_output_path: ""
+  
+  # Backup settings
+  create_backup: true
+  backup_suffix: "_backup"
+  
+  # Auto-generate output filename if not specified
+  auto_generate_output: true
+  output_suffix: "_updated"
+
+# Processing Options
+processing:
+  # Run format check and fix after processing
+  format_check: true
+  
+  # Enable verbose logging
+  verbose_logging: true
+  
+  # Batch size for processing packages
+  batch_size: 10
+  
+  # Delay between API calls (in seconds)
+  api_delay: 0.5
+  
+  # Skip packages that are already complete
+  skip_complete: true
+  
+  # Maximum concurrent requests
+  max_concurrent: 5
+
+# Vulnerability Scanning Settings
+scanning:
+  # Enable specific vulnerability databases
+  enable_github_advisory: true
+  enable_nist_nvd: true
+  enable_mitre_cve: true
+  enable_snyk: true
+  enable_exploit_db: true
+  
+  # Timeout for vulnerability scans (in seconds)
+  scan_timeout: 30
+  
+  # Enable AI analysis for vulnerabilities
+  enable_ai_analysis: true
+  
+  # Minimum severity level to report
+  min_severity: "low"  # low, medium, high, critical
+
+# PyPI Settings
+pypi:
+  # PyPI API base URL
+  api_base_url: "https://pypi.org/pypi"
+  
+  # Timeout for PyPI requests (in seconds)
+  timeout: 15
+  
+  # Maximum retries for PyPI requests
+  max_retries: 3
+  
+  # Cache package information
+  enable_cache: true
+  cache_duration: 3600  # 1 hour in seconds
+
+# Logging Configuration
+logging:
+  # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  level: "INFO"
+  
+  # Enable file logging
+  log_to_file: true
+  
+  # Log file path
+  log_file: "ihacpa_automation.log"
+  
+  # Maximum log file size (in MB)
+  max_log_size: 10
+  
+  # Number of backup log files to keep
+  backup_count: 5
+  
+  # Log format
+  format: "[%(asctime)s] %(levelname)s: %(message)s"
+  
+  # Date format
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+# GUI Settings
+gui:
+  # Window size
+  window_width: 900
+  window_height: 700
+  
+  # Theme settings
+  theme: "default"  # default, dark, light
+  
+  # Font settings
+  font_family: "Arial"
+  font_size: 9
+  
+  # Auto-save settings
+  auto_save_settings: true
+  settings_file: "ihacpa_settings.json"
+  
+  # Progress update frequency (in milliseconds)
+  progress_update_interval: 100
+
+# Security Settings
+security:
+  # Validate SSL certificates
+  verify_ssl: true
+  
+  # User agent string for HTTP requests
+  user_agent: "IHACPA-Automation/1.5.0"
+  
+  # Maximum file size for processing (in MB)
+  max_file_size: 100
+  
+  # Allowed file extensions
+  allowed_extensions: [".xlsx", ".xls"]
+
+# Performance Settings
+performance:
+  # Memory limit for processing (in MB)
+  memory_limit: 1024
+  
+  # Enable performance monitoring
+  enable_monitoring: false
+  
+  # Garbage collection frequency
+  gc_frequency: 100  # every N packages
+
+# Network Settings
+network:
+  # HTTP timeout (in seconds)
+  http_timeout: 30
+  
+  # Connection timeout (in seconds)
+  connect_timeout: 10
+  
+  # Read timeout (in seconds)
+  read_timeout: 30
+  
+  # Maximum redirects to follow
+  max_redirects: 5
+  
+  # Proxy settings (if needed)
+  proxy:
+    http: ""
+    https: ""
+  
+  # Headers to include in requests
+  headers:
+    Accept: "application/json"
+    Accept-Encoding: "gzip, deflate"
+
+# Error Handling
+error_handling:
+  # Continue processing on errors
+  continue_on_error: true
+  
+  # Maximum errors before stopping
+  max_errors: 10
+  
+  # Retry failed packages
+  retry_failed: true
+  
+  # Retry count for failed packages
+  retry_count: 2
+  
+  # Error notification
+  show_error_popup: true
+
+# Output Settings
+output:
+  # Include timestamp in output
+  include_timestamp: true
+  
+  # Include processing statistics
+  include_statistics: true
+  
+  # Export format options
+  export_formats: ["xlsx"]  # xlsx, csv, json
+  
+  # Compression for output files
+  compress_output: false
+
+# Development Settings (for debugging)
+development:
+  # Enable debug mode
+  debug_mode: false
+  
+  # Enable API mocking for testing
+  mock_api: false
+  
+  # Test mode (processes only first N packages)
+  test_mode: false
+  test_package_limit: 5
+  
+  # Dry run mode (no actual file changes)
+  dry_run: false
+
+# Advanced Settings
+advanced:
+  # Custom API endpoints
+  custom_endpoints:
+    github_advisory: ""
+    nist_nvd: ""
+    mitre_cve: ""
+    snyk: ""
+    exploit_db: ""
+  
+  # Custom timeout settings per API
+  api_timeouts:
+    github_advisory: 30
+    nist_nvd: 45
+    mitre_cve: 30
+    snyk: 30
+    exploit_db: 25
+  
+  # Rate limiting
+  rate_limits:
+    github_advisory: 60  # requests per minute
+    nist_nvd: 30
+    mitre_cve: 60
+    snyk: 30
+    exploit_db: 60

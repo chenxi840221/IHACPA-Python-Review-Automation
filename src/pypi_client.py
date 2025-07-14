@@ -140,7 +140,7 @@ class PyPIClient:
                 'pypi_latest_url': f"https://pypi.org/project/{package_name}/{latest_version}/",
                 'requires_dist': requires_dist,
                 'dependencies': dependencies,
-                'development_status': info.get('classifiers', []),
+                'development_status': self._extract_development_status(info.get('classifiers', [])),
                 'keywords': info.get('keywords', ''),
                 'platform': info.get('platform', ''),
                 'download_url': info.get('download_url', ''),
@@ -148,6 +148,7 @@ class PyPIClient:
                 'release_url': info.get('release_url', ''),
                 'docs_url': info.get('docs_url', ''),
                 'bugtrack_url': info.get('bugtrack_url', ''),
+                'requires_python': info.get('requires_python', ''),  # Python version requirement
                 'classifiers': info.get('classifiers', []),
                 'releases': releases  # Include releases data for version-specific queries
             }
@@ -317,6 +318,19 @@ class PyPIClient:
         data = self._make_request(url)
         return data is not None
     
+    def _extract_development_status(self, classifiers: List[str]) -> str:
+        """Extract development status from classifiers list"""
+        if not classifiers:
+            return "Unknown"
+            
+        for classifier in classifiers:
+            if isinstance(classifier, str) and 'Development Status' in classifier:
+                # Extract status like "4 - Beta" from "Development Status :: 4 - Beta"
+                status = classifier.split('::')[-1].strip()
+                return status
+                
+        return "Unknown"
+    
     def get_development_status(self, package_name: str) -> str:
         """Extract development status from classifiers"""
         package_info = self.get_package_info(package_name)
@@ -324,13 +338,7 @@ class PyPIClient:
             return "Unknown"
             
         classifiers = package_info.get('classifiers', [])
-        for classifier in classifiers:
-            if 'Development Status' in classifier:
-                # Extract status like "4 - Beta" from "Development Status :: 4 - Beta"
-                status = classifier.split('::')[-1].strip()
-                return status
-                
-        return "Unknown"
+        return self._extract_development_status(classifiers)
     
     def compare_versions(self, current_version: str, latest_version: str) -> Dict[str, Any]:
         """Compare current and latest versions"""
@@ -472,10 +480,11 @@ class PyPIClient:
             'github_url': github_url,
             'dependencies': dependencies,
             'requires_dist': requires_dist,
-            'development_status': info.get('classifiers', []),
+            'development_status': self._extract_development_status(info.get('classifiers', [])),
             'summary': info.get('summary', ''),
             'author': info.get('author', ''),
             'license': info.get('license', ''),
+            'requires_python': info.get('requires_python', ''),  # Python version requirement
             'classifiers': info.get('classifiers', [])
         }
     
