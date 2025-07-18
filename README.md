@@ -6,10 +6,14 @@ This project automates the cybersecurity vulnerability review process for Python
 
 ## Current Status
 
-- **Version:** 1.5.1 (July 13, 2025)
+- **Version:** 1.6.0 (July 18, 2025)
 - **Total Packages to Review:** 486 (confirmed from Excel analysis)
-- **Status:** ✅ **PRODUCTION READY** - Enhanced GUI with improved stability
-- **Latest Improvements:** Fixed Excel conversion errors, enhanced GUI, added keyboard shortcuts
+- **Status:** ✅ **PRODUCTION READY** - Critical stakeholder issues resolved
+- **Latest Improvements:** 
+  - ✅ **CRITICAL FIX**: SQLAlchemy 1.4.39 vulnerability detection resolved
+  - ✅ **ENHANCED SNYK Logic**: Latest non-vulnerable version detection
+  - ✅ **SNYK URL Format**: 100% compliant with correct format
+  - ✅ **Smart Upgrade Guidance**: Actionable recommendations instead of generic messages
 
 ## Key Features
 
@@ -22,7 +26,7 @@ This project automates the cybersecurity vulnerability review process for Python
 ### Multi-Database Vulnerability Scanning
 - **NIST NVD** (National Vulnerability Database) with **AI-powered analysis** ✨
 - **MITRE CVE** database with **AI-powered analysis** ✨
-- **SNYK** Vulnerability Database with **AI-powered analysis** ✨
+- **SNYK** Vulnerability Database with **Enhanced AI-powered analysis** ✨ **UPGRADED**
 - **Exploit Database** with **AI-powered analysis** ✨
 - **GitHub Security Advisories** with **AI-powered analysis** ✨
 
@@ -31,7 +35,11 @@ This project automates the cybersecurity vulnerability review process for Python
 - **Five AI-powered vulnerability databases**:
   - **NIST NVD Analysis**: Official U.S. government vulnerability database with CVSS scoring
   - **MITRE CVE Analysis**: Official CVE vulnerability detection
-  - **SNYK Analysis**: Commercial vulnerability intelligence
+  - **SNYK Analysis**: Commercial vulnerability intelligence with **Enhanced Logic** ✨ **NEW**
+    - **Latest Non-Vulnerable Version Detection**: Identifies safe upgrade targets
+    - **Smart Upgrade Guidance**: Actionable recommendations instead of generic messages
+    - **Version Comparison Logic**: Compares safe version with current version
+    - **Format**: "Vulnerabilities found in vX.Y.Z (Severity: HIGH, CVEs: CVE-XXXX). Latest safe version: A.B.C available - consider upgrade."
   - **Exploit Database Analysis**: Public exploit availability assessment
   - **GitHub Security Advisory Analysis**: Community-reported vulnerability intelligence
 - **Version-specific vulnerability impact analysis** across all databases
