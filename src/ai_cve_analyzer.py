@@ -346,26 +346,32 @@ PACKAGE INFORMATION:
 - Current Version: {current_version}
 - SNYK Lookup URL: {snyk_lookup_url}
 
+IMPORTANT INSTRUCTIONS:
+1. Visit the SNYK URL: https://security.snyk.io/package/pip/{package_name}
+2. Look for vulnerability listings that show affected version ranges
+3. Check if version {current_version} falls within any vulnerable version ranges
+4. Do NOT just look for exact version matches - check version ranges like ">=2.0.0,<2.0.42"
+
 TASK:
-Analyze the SNYK vulnerability information for this specific package and version. SNYK is a specialized security platform that provides detailed vulnerability analysis for open source packages. Provide a concise assessment that includes:
+Analyze the SNYK vulnerability information for this specific package and version. SNYK provides detailed vulnerability analysis with specific version ranges. Provide a concise assessment that includes:
 
 1. VULNERABILITY STATUS: Are there any vulnerabilities in SNYK database that affect the current version {current_version}?
-2. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest severity level according to SNYK?
-3. VERSION IMPACT: Does the current version {current_version} have known vulnerabilities in SNYK?
-4. RISK ASSESSMENT: What is the overall security risk level for this version based on SNYK data?
-5. RECOMMENDATION: Should this version be updated or is it safe to use according to SNYK analysis?
+2. VERSION RANGE CHECK: Does version {current_version} fall within any vulnerable version ranges listed on SNYK?
+3. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest severity level according to SNYK?
+4. CVE IDENTIFICATION: List any specific CVE numbers found that affect this version
+5. RECOMMENDATION: Should this version be updated based on SNYK findings?
 
 RESPONSE FORMAT:
 Provide a concise response (2-3 sentences max) in this format:
-"SNYK Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+"SNYK Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. CVEs: [list CVE numbers or NONE]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
 
 GUIDELINES:
-- Be specific about version impact based on SNYK vulnerability database
-- Focus on the current version {current_version}, not future versions
-- Use clear, actionable language for security recommendations
-- If no specific version information is available, state "version impact unclear"
-- Consider SNYK's reputation for accurate vulnerability detection
-- Prioritize security over convenience
+- Check version ranges carefully - vulnerabilities often affect ranges like ">=1.0.0,<1.2.5"
+- Version {current_version} could be vulnerable even if not exactly listed
+- Report "NOT_FOUND" only if no vulnerabilities exist for this package at all
+- Report "AFFECTED" if the current version falls within any vulnerable range
+- Include specific CVE numbers when found
+- Prioritize accuracy over speed - version range checking is critical
 """
         
         # Add raw SNYK data if available
