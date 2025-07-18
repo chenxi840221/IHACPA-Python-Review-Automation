@@ -351,25 +351,29 @@ IMPORTANT INSTRUCTIONS:
 2. Look for vulnerability listings that show affected version ranges
 3. Check if version {current_version} falls within any vulnerable version ranges
 4. Do NOT just look for exact version matches - check version ranges like ">=2.0.0,<2.0.42"
+5. CRITICAL: If vulnerabilities exist, identify the LATEST NON-VULNERABLE VERSION available
 
 TASK:
 Analyze the SNYK vulnerability information for this specific package and version. SNYK provides detailed vulnerability analysis with specific version ranges. Provide a concise assessment that includes:
 
 1. VULNERABILITY STATUS: Are there any vulnerabilities in SNYK database that affect the current version {current_version}?
 2. VERSION RANGE CHECK: Does version {current_version} fall within any vulnerable version ranges listed on SNYK?
-3. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest severity level according to SNYK?
-4. CVE IDENTIFICATION: List any specific CVE numbers found that affect this version
-5. RECOMMENDATION: Should this version be updated based on SNYK findings?
+3. LATEST SAFE VERSION: If vulnerabilities exist, what is the latest non-vulnerable version available?
+4. SEVERITY ASSESSMENT: If vulnerabilities exist, what is the highest severity level according to SNYK?
+5. CVE IDENTIFICATION: List any specific CVE numbers found that affect this version
+6. RECOMMENDATION: Should this version be updated based on SNYK findings?
 
 RESPONSE FORMAT:
 Provide a concise response (2-3 sentences max) in this format:
-"SNYK Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. CVEs: [list CVE numbers or NONE]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
+"SNYK Analysis: [FOUND/NOT_FOUND] - [Brief summary]. Severity: [CRITICAL/HIGH/MEDIUM/LOW/NONE]. Current version {current_version}: [AFFECTED/NOT_AFFECTED]. Latest safe version: [VERSION or N/A]. CVEs: [list CVE numbers or NONE]. Recommendation: [ACTION_NEEDED/MONITOR/SAFE_TO_USE]"
 
 GUIDELINES:
 - Check version ranges carefully - vulnerabilities often affect ranges like ">=1.0.0,<1.2.5"
 - Version {current_version} could be vulnerable even if not exactly listed
 - Report "NOT_FOUND" only if no vulnerabilities exist for this package at all
 - Report "AFFECTED" if the current version falls within any vulnerable range
+- ALWAYS identify the latest safe version when vulnerabilities exist
+- The latest safe version should be the highest version that doesn't fall within any vulnerable ranges
 - Include specific CVE numbers when found
 - Prioritize accuracy over speed - version range checking is critical
 """
