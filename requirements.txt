@@ -1,6 +1,7 @@
 # Core dependencies for IHACPA Python Package Review Automation
-# Updated after complete implementation and testing - 2025-07-09
+# Updated after complete implementation and testing - 2025-07-18
 # Successfully tested with all 486 packages - 100% success rate
+# Version 1.6.0 - Critical SNYK fixes and enhanced logic
 
 # REQUIRED DEPENDENCIES
 # Essential Excel and data processing
@@ -53,10 +54,13 @@ mkdocs-material>=8.0.0            # Documentation theme
 # For development, install all dependencies:
 # pip install -r requirements.txt
 
-# TESTED VERSIONS (July 9, 2025)
+# TESTED VERSIONS (July 18, 2025)
 # All dependencies successfully tested with:
 # - 486 packages processed
 # - 1.3 minutes total processing time
 # - 100% success rate
 # - Copy-based workflow implemented
 # - Excel timezone compatibility resolved
+# - Critical SNYK fixes implemented
+# - Enhanced logic with latest non-vulnerable version detection
+# - SQLAlchemy 1.4.39 vulnerability detection resolved
