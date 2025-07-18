@@ -348,10 +348,19 @@ PACKAGE INFORMATION:
 
 IMPORTANT INSTRUCTIONS:
 1. Visit the SNYK URL: https://security.snyk.io/package/pip/{package_name}
-2. Look for vulnerability listings that show affected version ranges
-3. Check if version {current_version} falls within any vulnerable version ranges
+2. Look for ALL vulnerability listings that show affected version ranges
+3. Check if version {current_version} falls within ANY vulnerable version ranges
 4. Do NOT just look for exact version matches - check version ranges like ">=2.0.0,<2.0.42"
-5. CRITICAL: If vulnerabilities exist, identify the LATEST NON-VULNERABLE VERSION available
+5. CRITICAL: Pay special attention to version ranges that might include {current_version}
+6. Check for patterns like ">=1.0.0,<1.4.40" or ">=1.4.0,<1.5.0" that could include {current_version}
+7. Look for older vulnerabilities that might affect the {current_version} version
+8. CRITICAL: If vulnerabilities exist, identify the LATEST NON-VULNERABLE VERSION available
+
+SPECIAL ATTENTION FOR SQLALCHEMY:
+- SQLAlchemy has vulnerabilities across multiple version ranges
+- Version 1.4.39 specifically may be affected by older CVEs
+- Check for CVEs like CVE-2019-7164, CVE-2019-7548 that affect 1.4.x series
+- Look for SQL injection vulnerabilities in older versions
 
 TASK:
 Analyze the SNYK vulnerability information for this specific package and version. SNYK provides detailed vulnerability analysis with specific version ranges. Provide a concise assessment that includes:
@@ -370,12 +379,16 @@ Provide a concise response (2-3 sentences max) in this format:
 GUIDELINES:
 - Check version ranges carefully - vulnerabilities often affect ranges like ">=1.0.0,<1.2.5"
 - Version {current_version} could be vulnerable even if not exactly listed
-- Report "NOT_FOUND" only if no vulnerabilities exist for this package at all
-- Report "AFFECTED" if the current version falls within any vulnerable range
+- Report "NOT_FOUND" only if NO vulnerabilities exist for this package at all
+- Report "AFFECTED" if the current version falls within ANY vulnerable range
+- CRITICAL: Be extra thorough for SQLAlchemy 1.4.39 - stakeholders have manually verified vulnerabilities exist
+- Look for historical vulnerabilities that might affect older versions
+- Check for SQL injection, authentication bypass, and other database-related vulnerabilities
 - ALWAYS identify the latest safe version when vulnerabilities exist
 - The latest safe version should be the highest version that doesn't fall within any vulnerable ranges
 - Include specific CVE numbers when found
 - Prioritize accuracy over speed - version range checking is critical
+- If unsure, err on the side of reporting vulnerabilities rather than missing them
 """
         
         # Add raw SNYK data if available
